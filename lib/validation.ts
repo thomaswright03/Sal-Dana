@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { APPOINTMENT_STATUSES, LEAD_STATUSES } from "./types";
+import { APPOINTMENT_STATUSES, LEAD_STATUSES, REVIEW_SOURCES, TRAFFIC_EVENTS } from "./types";
 
 const text = (max: number) => z.string().trim().max(max);
 
@@ -27,6 +27,7 @@ export const publicLeadSchema = z.object({
   details: text(3000).default(""),
   date: z.union([z.literal(""), dateSchema]).default(""),
   window: z.union([z.literal(""), windowSchema]).default(""),
+  language: z.enum(["en", "es"]).default("en"),
   // Honeypot: real visitors never fill this in.
   company: z.string().max(200).default(""),
 });
@@ -60,3 +61,27 @@ export const crmPatchSchema = z
     removeNoteId: z.string().max(64),
   })
   .partial();
+
+/** CRM: add or edit a customer review. */
+export const reviewSchema = z.object({
+  name: text(80).min(1, "Add the customer's name"),
+  city: text(80).default(""),
+  service: text(120).default(""),
+  rating: z.number().int().min(1).max(5),
+  text: text(1500).min(1, "Add what they wrote"),
+  date: dateSchema,
+  source: z.enum(REVIEW_SOURCES),
+  published: z.boolean(),
+});
+
+/** Public site: anonymous visit counter. */
+export const trackSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("view"),
+    first: z.boolean(),
+    lang: z.enum(["en", "es"]),
+    ref: z.string().max(500).default(""),
+    utm: z.string().max(80).default(""),
+  }),
+  z.object({ kind: z.literal("event"), event: z.enum(TRAFFIC_EVENTS) }),
+]);

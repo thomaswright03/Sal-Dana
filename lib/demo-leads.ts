@@ -245,10 +245,105 @@ export async function clearDemoLeads(): Promise<number> {
   return demo.length;
 }
 
+const HISTORY_NAMES = [
+  "Olivia Hart",
+  "Ethan Cole",
+  "Lucia Ramirez",
+  "Noah Bennett",
+  "Grace Kim",
+  "Marcus Reed",
+  "Elena Torres",
+  "Henry Walsh",
+  "Isabel Cruz",
+  "Owen Fischer",
+  "Rosa Delgado",
+  "Liam Carter",
+  "Nina Patel",
+  "Victor Salas",
+  "Chloe Nguyen",
+  "Samuel Ortiz",
+  "Paige Dawson",
+  "Andre Wilson",
+  "Camila Vega",
+  "Jack Morrison",
+  "Teresa Luna",
+  "Ben Schwartz",
+  "Marisol Rios",
+  "Evan Brooks",
+  "Dana Whitaker",
+  "Hector Ruiz",
+  "Julia Stone",
+  "Miguel Santos",
+  "Abby Larson",
+  "Trevor Hayes",
+  "Carmen Flores",
+  "Wes Coleman",
+  "Ana Castillo",
+  "Peter Lindqvist",
+];
+
+const HISTORY_JOBS: [service: string, details: string, low: number, high: number][] = [
+  ["Kitchen & bath refresh", "New vanity, faucet and mirror in the hall bath.", 1400, 4200],
+  ["Carpentry & trim", "Baseboards and door casing through the main floor.", 900, 3600],
+  ["Drywall & paint", "Patch and repaint two bedrooms and the hallway.", 650, 2400],
+  ["Doors & hardware", "Rehang interior doors and swap all the hardware.", 380, 1900],
+  ["Tile & flooring", "Replace cracked tile and redo the transitions.", 420, 1800],
+  ["Mounting & installs", "TV, shelving and blinds in the living room.", 240, 980],
+  ["Outdoor & patio", "Repair the gate and repaint the patio cover.", 520, 3100],
+  ["The punch list", "A long list of small fixes before listing the house.", 700, 2800],
+];
+
+/** Older, already-decided jobs so the charts have a few months of history. */
+function historyLeads(now: number): Lead[] {
+  // A fixed sequence, so every load produces the same history.
+  let seed = 20261120;
+  const rand = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  return HISTORY_NAMES.map((name, i): Lead => {
+    const age = 14 + Math.round((i / HISTORY_NAMES.length) * 104 + rand() * 4);
+    const job = HISTORY_JOBS[Math.floor(rand() * HISTORY_JOBS.length)];
+    const won = rand() < 0.76;
+    const createdMs = now - age * 86_400_000 - Math.round(rand() * 9 * 3_600_000);
+    const closedMs = Math.min(now - 3_600_000, createdMs + Math.round((4 + rand() * 9) * 86_400_000));
+    const created = new Date(createdMs).toISOString();
+    const closed = new Date(closedMs).toISOString();
+    const roll = rand();
+    const spanish = /Ramirez|Torres|Cruz|Delgado|Salas|Ortiz|Vega|Luna|Rios|Ruiz|Santos|Flores|Castillo/.test(
+      name,
+    );
+    return {
+      id: randomUUID(),
+      createdAt: created,
+      updatedAt: closed,
+      closedAt: closed,
+      name,
+      phone: `(480) 555-01${String(i + 20).padStart(2, "0")}`,
+      email: "",
+      address: site.cities[Math.floor(rand() * site.cities.length)],
+      service: job[0],
+      details: job[1],
+      source: roll < 0.55 ? "website-form" : roll < 0.85 ? "ai-assistant" : "manual",
+      status: won ? "won" : "lost",
+      value: Math.round((job[2] + rand() * (job[3] - job[2])) / 10) * 10,
+      appointment: {
+        date: new Date(closedMs - 86_400_000).toISOString().slice(0, 10),
+        window: (["morning", "midday", "afternoon"] as const)[Math.floor(rand() * 3)],
+        status: won ? "completed" : "cancelled",
+      },
+      notes: [],
+      transcript: null,
+      ...(spanish && rand() < 0.6 ? { language: "es" as const } : {}),
+      demo: true,
+    };
+  });
+}
+
 export async function loadDemoLeads(): Promise<number> {
   await clearDemoLeads();
   const now = Date.now();
-  const leads = seeds.map((s, i): Lead => {
+  const recent = seeds.map((s, i): Lead => {
     // Stagger arrival times so the list reads like real, uneven traffic.
     const created = new Date(now - s.age * 86_400_000 - (i * 37 + 12) * 60_000).toISOString();
     return {
@@ -273,9 +368,18 @@ export async function loadDemoLeads(): Promise<number> {
         }))
         .reverse(),
       transcript: s.transcript ?? null,
+      ...(s.status === "won" || s.status === "lost"
+        ? {
+            closedAt: new Date(
+              Math.min(now - 3_600_000, new Date(created).getTime() + 6 * 86_400_000),
+            ).toISOString(),
+          }
+        : {}),
+      ...(/Lopez|Mendez|Reyes|Romero/.test(s.name) ? { language: "es" as const } : {}),
       demo: true,
     };
   });
+  const leads = [...recent, ...historyLeads(now)];
   for (let i = 0; i < leads.length; i += 8) {
     await Promise.all(leads.slice(i, i + 8).map(saveLead));
   }

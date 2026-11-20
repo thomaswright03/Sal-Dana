@@ -2,23 +2,22 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { site } from "@/lib/site";
+import { track } from "@/lib/track";
 import { EASE, useIntroDone } from "./Intro";
+import { useCopy, useLocale } from "./useCopy";
 
 type Card = { type: "booked"; dateLabel: string; window: string } | { type: "callback" };
 type Msg = { role: "user" | "assistant"; content: string; cards?: Card[]; error?: boolean };
 
-const STORAGE_KEY = "sd-chat-v1";
-const GREETING: Msg = {
-  role: "assistant",
-  content: `Hello, and welcome. I can answer questions about ${site.owner}’s work or set up a visit for you. What’s going on at your place?`,
-};
-const SUGGESTIONS = ["Book a visit", "What do you do?", "Do you come to my area?"];
+// The greeting is ours, not the model's, so it is drawn from the page copy and never stored.
+const STORAGE_KEY = "sd-chat-v2";
 
 export function Chat() {
   const ready = useIntroDone();
+  const locale = useLocale();
+  const t = useCopy().chat;
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([GREETING]);
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [working, setWorking] = useState(false);
@@ -82,9 +81,8 @@ export function Chat() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // The greeting is ours, not the model’s, so the conversation starts at the first visitor message.
+          locale,
           messages: history
-            .slice(1)
             .filter((m) => m.content.trim() && !m.error)
             .slice(-30)
             .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) })),
@@ -92,7 +90,7 @@ export function Chat() {
       });
       if (!res.ok || !res.body) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
-        fail(data.error ?? `Something went wrong. Please call or text ${site.phoneDisplay}.`);
+        fail(data.error ?? t.errorGeneric);
         return;
       }
 
@@ -127,7 +125,7 @@ export function Chat() {
       }
       patchLast((m) => ({ ...m, content: m.content.trim() }));
     } catch {
-      fail(`The connection dropped. Please try again, or call ${site.phoneDisplay}.`);
+      fail(t.errorDropped);
     } finally {
       setBusy(false);
       setWorking(false);
@@ -140,7 +138,7 @@ export function Chat() {
   };
 
   const last = messages[messages.length - 1];
-  const waiting = busy && last.role === "assistant" && !last.content;
+  const waiting = busy && last?.role === "assistant" && !last.content;
 
   return (
     <>
@@ -148,18 +146,21 @@ export function Chat() {
         {ready && !open && (
           <motion.button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              track("chat_open", true);
+              setOpen(true);
+            }}
             className="group fixed bottom-5 right-5 z-[70] flex items-center gap-3 rounded-full border border-brass/40 bg-coal/90 py-3 pl-4 pr-5 text-sm shadow-[0_20px_60px_-15px_rgb(0_0_0/0.8)] backdrop-blur-xl transition-colors duration-500 hover:border-brass sm:bottom-7 sm:right-7"
             initial={{ opacity: 0, y: 30, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}
-            aria-label="Open the booking assistant"
+            aria-label={t.openLabel}
           >
             <span className="relative flex h-2.5 w-2.5">
               <span className="h-2.5 w-2.5 rounded-full bg-brass animate-pulse-dot" />
             </span>
-            <span className="text-bone">Ask &amp; book</span>
+            <span className="text-bone">{t.open}</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -168,7 +169,7 @@ export function Chat() {
         {open && (
           <motion.div
             role="dialog"
-            aria-label="Booking assistant"
+            aria-label={t.dialog}
             data-lenis-prevent
             className="fixed inset-0 z-[80] flex flex-col overflow-hidden bg-coal sm:inset-auto sm:bottom-7 sm:right-7 sm:h-[min(680px,calc(100dvh-3.5rem))] sm:w-[400px] sm:rounded-[1.5rem] sm:border sm:border-line sm:shadow-[0_40px_120px_-20px_rgb(0_0_0/0.9)]"
             style={{ transformOrigin: "100% 100%" }}
@@ -188,10 +189,10 @@ export function Chat() {
                   SD
                 </div>
                 <div>
-                  <p className="font-serif text-xl leading-none">Sal Dana concierge</p>
+                  <p className="font-serif text-xl leading-none">{t.title}</p>
                   <p className="mt-1.5 flex items-center gap-2 text-[0.6875rem] text-dust">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    AI assistant · books visits for {site.owner}
+                    {t.subtitle}
                   </p>
                 </div>
               </div>
@@ -199,7 +200,7 @@ export function Chat() {
                 type="button"
                 onClick={() => setOpen(false)}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-sand transition-colors hover:border-brass/60 hover:text-bone"
-                aria-label="Close the assistant"
+                aria-label={t.close}
               >
                 <svg
                   viewBox="0 0 12 12"
@@ -218,6 +219,11 @@ export function Chat() {
               className="relative flex-1 space-y-4 overflow-y-auto px-5 py-5"
               aria-live="polite"
             >
+              <div className="flex flex-col items-start">
+                <div className="max-w-[86%] whitespace-pre-wrap rounded-2xl rounded-bl-md bg-char px-4 py-3 text-[0.9375rem] leading-relaxed text-bone">
+                  {t.greeting}
+                </div>
+              </div>
               {messages.map((m, i) => {
                 if (m.role === "assistant" && !m.content && !m.cards?.length) return null;
                 return (
@@ -259,7 +265,7 @@ export function Chat() {
                           >
                             <path d="M2 6.5 5 9.5 10.5 3" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
-                          {card.type === "booked" ? "Visit requested" : "Message passed along"}
+                          {card.type === "booked" ? t.booked : t.callback}
                         </p>
                         {card.type === "booked" ? (
                           <>
@@ -267,7 +273,7 @@ export function Chat() {
                             <p className="mt-1 text-sm text-sand">{card.window}</p>
                           </>
                         ) : (
-                          <p className="text-sm text-sand">{site.owner} will call or text you back.</p>
+                          <p className="text-sm text-sand">{t.callbackBody}</p>
                         )}
                       </motion.div>
                     ))}
@@ -286,13 +292,13 @@ export function Chat() {
                       />
                     ))}
                   </span>
-                  {working ? "Checking the calendar" : "Thinking"}
+                  {working ? t.checking : t.thinking}
                 </div>
               )}
 
-              {messages.length === 1 && (
+              {messages.length === 0 && (
                 <div className="flex flex-wrap gap-2 pt-1">
-                  {SUGGESTIONS.map((s, i) => (
+                  {t.suggestions.map((s, i) => (
                     <motion.button
                       key={s}
                       type="button"
@@ -323,15 +329,15 @@ export function Chat() {
                   }}
                   rows={1}
                   maxLength={2000}
-                  placeholder="Type a message"
-                  aria-label="Message"
+                  placeholder={t.placeholder}
+                  aria-label={t.messageLabel}
                   className="max-h-28 min-h-[1.75rem] flex-1 resize-none bg-transparent py-1 text-[0.9375rem] text-bone outline-none placeholder:text-dust/70 focus-visible:outline-none [field-sizing:content]"
                 />
                 <button
                   type="submit"
                   disabled={busy || !input.trim()}
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brass text-ink transition-all duration-300 hover:bg-brass-bright disabled:opacity-30"
-                  aria-label="Send"
+                  aria-label={t.send}
                 >
                   <svg
                     viewBox="0 0 12 12"
@@ -344,9 +350,7 @@ export function Chat() {
                   </svg>
                 </button>
               </div>
-              <p className="mt-2 text-center text-[0.625rem] text-dust">
-                AI assistant. {site.owner} confirms every visit personally.
-              </p>
+              <p className="mt-2 text-center text-[0.625rem] text-dust">{t.footnote}</p>
             </form>
           </motion.div>
         )}

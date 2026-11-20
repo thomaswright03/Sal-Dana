@@ -3,27 +3,36 @@
 import { animate, AnimatePresence, motion, useMotionValue, useTransform } from "motion/react";
 import { useEffect, useState } from "react";
 import { EASE, EASE_IN_OUT } from "./Intro";
+import { useCopy } from "./useCopy";
 
 const WORD = "Sal Dana";
 
 /** Opening curtain: the name sets itself, a brass rule fills, and the page is unveiled. */
 export function Preloader({ onDone }: { onDone: () => void }) {
+  const t = useCopy();
   const [visible, setVisible] = useState(true);
   const progress = useMotionValue(0);
   const count = useTransform(progress, (v) => String(Math.round(v)).padStart(3, "0"));
   const scaleX = useTransform(progress, [0, 100], [0, 1]);
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let quick = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    try {
+      // The full curtain plays once per visit. Later loads, such as switching language, open quickly.
+      if (sessionStorage.getItem("sd-intro")) quick = true;
+      sessionStorage.setItem("sd-intro", "1");
+    } catch {
+      /* storage unavailable: play the full intro */
+    }
     document.documentElement.style.overflow = "hidden";
     const controls = animate(progress, 100, {
-      duration: reduce ? 0.2 : 1.9,
+      duration: quick ? 0.2 : 1.9,
       ease: [0.65, 0, 0.35, 1],
       onComplete: () => {
         setVisible(false);
         document.documentElement.style.overflow = "";
         // Let the curtain start lifting before the hero plays.
-        setTimeout(onDone, reduce ? 0 : 450);
+        setTimeout(onDone, quick ? 0 : 450);
       },
     });
     return () => {
@@ -72,7 +81,7 @@ export function Preloader({ onDone }: { onDone: () => void }) {
 
           <div>
             <div className="mb-4 flex items-end justify-between">
-              <span className="eyebrow">Preparing the site</span>
+              <span className="eyebrow">{t.preloader}</span>
               <motion.span className="font-mono text-sm tabular-nums text-brass">{count}</motion.span>
             </div>
             <div className="h-px w-full bg-line">

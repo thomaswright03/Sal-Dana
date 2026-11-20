@@ -2,15 +2,16 @@
 
 Marketing site, AI booking assistant, and CRM for Sal Dana Renovations LLC, Alan's handyman and renovation business in Arizona.
 
-- **Site** (`/`): animated single-page marketing site with a booking form.
-- **Assistant**: a chat window on the site, powered by the Anthropic API, that answers questions and saves visit requests straight into the CRM.
-- **CRM** (`/crm`): password-protected pipeline, lead list, and visit calendar.
+- **Site** (`/`, and `/es` in Spanish): animated single-page marketing site with a booking form. Every word visitors read lives in `lib/copy.ts`, in English and Spanish, with a language switch in the header and footer.
+- **Assistant**: a chat window on the site, powered by the Anthropic API, that answers questions and saves visit requests straight into the CRM. The same key powers Ask AI in the dashboard. Both stay off, with a clear message, until `ANTHROPIC_API_KEY` is set.
+- **Owner dashboard** (`/crm`): password-protected. Overview with visitors, requests, a visitor-to-job funnel and jobs won; Leads (table and pipeline board); Schedule (week calendar); Reviews (choose which appear on the site); Traffic; Ask AI (plain-language questions about the business's own records); Settings.
+- **Visitor counting**: the site counts its own visits through `/api/track` as anonymous daily totals. No cookies, no third-party trackers, nothing that identifies a person.
 
 Built with Next.js (App Router), Tailwind CSS, Motion, and Lenis. Deployed on Vercel.
 
 ## Editing the content
 
-Almost everything a visitor reads lives in [`lib/site.ts`](lib/site.ts): phone, email, service list, service area, working hours, process steps, and FAQs. The assistant reads the same file, so it stays in step with the site.
+Almost everything a visitor reads lives in [`lib/site.ts`](lib/site.ts): phone, email, service list, service area, working hours, process steps, and FAQs. The assistant reads the same file, so it stays in step with the site. Interface text and the full Spanish version live in [`lib/copy.ts`](lib/copy.ts). When a service, FAQ, or step changes in `lib/site.ts`, update its Spanish counterpart in `lib/copy.ts` too.
 
 ## Environment variables
 
@@ -25,9 +26,13 @@ Copy `.env.example` to `.env.local` for local work. Never commit real values.
 
 ## Preview mode and sample data
 
-Set `NEXT_PUBLIC_DEMO_MODE=1` to show a reviews section filled with sample reviews from `lib/demo.ts`. They are labelled as samples on the page and the whole site is marked `noindex` while the flag is on. Before launch, replace them with real reviews and remove the flag.
+Set `NEXT_PUBLIC_DEMO_MODE=1` to mark the whole site `noindex` while it is being reviewed. Remove the flag at launch.
 
-In the CRM, "Load sample data" adds a set of example leads (from `lib/demo-leads.ts`) across every stage. They are flagged as samples and "Remove sample data" deletes only those, leaving real leads alone.
+In the dashboard, Settings has "Load sample data". It adds example leads (`lib/demo-leads.ts`) plus sample reviews and 120 days of sample visits (`lib/demo-data.ts`). Everything is flagged as a sample, sample reviews are labelled as samples on the public site, and "Remove sample data" deletes only the samples, leaving real records alone.
+
+## Reviews
+
+The reviews section on the site shows whatever is switched on under Reviews in the dashboard, and hides itself when nothing is. Add real reviews there, exactly as customers wrote them.
 
 ## Running locally
 

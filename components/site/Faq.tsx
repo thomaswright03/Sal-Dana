@@ -2,11 +2,12 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { faqs } from "@/lib/site";
 import { EASE } from "./Intro";
 import { FadeUp, RevealLines } from "./Reveal";
+import { headingLines, useCopy } from "./useCopy";
 
 export function Faq() {
+  const t = useCopy();
   const [open, setOpen] = useState<number | null>(0);
 
   return (
@@ -16,25 +17,20 @@ export function Faq() {
           <FadeUp>
             <p className="eyebrow mb-5 flex items-center gap-3">
               <span className="h-px w-8 bg-brass" />
-              Questions
+              {t.faq.eyebrow}
             </p>
           </FadeUp>
           <RevealLines
             className="font-serif text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.95] tracking-[-0.02em]"
-            lines={[
-              <>Good to</>,
-              <>
-                <em className="text-brass">know.</em>
-              </>,
-            ]}
+            lines={headingLines(t.faq.heading)}
           />
         </div>
 
         <div className="lg:col-span-7 lg:col-start-6">
-          {faqs.map((item, i) => {
+          {t.faq.items.map((item, i) => {
             const isOpen = open === i;
             return (
-              <FadeUp key={item.q} delay={i * 0.05} y={16}>
+              <FadeUp key={i} delay={i * 0.05} y={16}>
                 <div className="border-b border-line">
                   <button
                     type="button"

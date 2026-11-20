@@ -154,10 +154,16 @@ function Panel({ lead, onClose, onPatch, onCreate, onDelete }: PanelProps) {
           <div className="min-w-0">
             <p className="eyebrow">
               {lead ? `${SOURCE_LABELS[lead.source]} · added ${ago(lead.createdAt)}` : "New lead"}
+              {lead?.demo && " · sample"}
             </p>
             <h2 className="mt-2 truncate font-serif text-4xl leading-none tracking-tight">
               {lead ? draft.name || lead.name : "Add a lead"}
             </h2>
+            {lead?.language === "es" && (
+              <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-brass/40 bg-brass/10 px-3 py-1 text-[0.6875rem] text-brass">
+                Prefers Spanish · used the site in Spanish
+              </p>
+            )}
             {lead && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {lead.phone && (

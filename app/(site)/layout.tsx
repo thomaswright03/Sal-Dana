@@ -1,6 +1,8 @@
 import { Chat } from "@/components/site/Chat";
 import { Nav } from "@/components/site/Nav";
 import { SiteShell } from "@/components/site/SiteShell";
+import { Track } from "@/components/site/Track";
+import { getPublishedReviews } from "@/lib/site-reviews";
 import { faqs, services, site } from "@/lib/site";
 
 const jsonLd = {
@@ -32,7 +34,8 @@ const jsonLd = {
   ],
 };
 
-export default function SiteLayout({ children }: LayoutProps<"/">) {
+export default async function SiteLayout({ children }: LayoutProps<"/">) {
+  const hasReviews = (await getPublishedReviews()).length > 0;
   return (
     <>
       <script
@@ -43,9 +46,10 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
         <style>{`.preloader{display:none!important}`}</style>
       </noscript>
       <SiteShell>
-        <Nav />
+        <Nav hasReviews={hasReviews} />
         {children}
         <Chat />
+        <Track />
       </SiteShell>
     </>
   );

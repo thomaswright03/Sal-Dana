@@ -2,10 +2,11 @@
 
 import { motion, useScroll, useSpring } from "motion/react";
 import { useRef } from "react";
-import { processSteps } from "@/lib/site";
 import { FadeUp, RevealLines } from "./Reveal";
+import { headingLines, useCopy } from "./useCopy";
 
 export function Process() {
+  const t = useCopy();
   const list = useRef<HTMLOListElement>(null);
   const { scrollYProgress } = useScroll({ target: list, offset: ["start 0.7", "end 0.6"] });
   const scaleY = useSpring(scrollYProgress, { stiffness: 90, damping: 24 });
@@ -18,23 +19,15 @@ export function Process() {
             <FadeUp>
               <p className="eyebrow mb-5 flex items-center gap-3">
                 <span className="h-px w-8 bg-brass" />
-                How it works
+                {t.process.eyebrow}
               </p>
             </FadeUp>
             <RevealLines
               className="font-serif text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.95] tracking-[-0.02em]"
-              lines={[
-                <>Simple,</>,
-                <>
-                  start to <em className="text-brass">finish.</em>
-                </>,
-              ]}
+              lines={headingLines(t.process.heading)}
             />
             <FadeUp delay={0.2}>
-              <p className="mt-8 max-w-sm text-[1.0625rem] leading-relaxed text-sand">
-                No call centers and no crews you’ve never met. You deal with one person from the first message
-                to the final walkthrough.
-              </p>
+              <p className="mt-8 max-w-sm text-[1.0625rem] leading-relaxed text-sand">{t.process.body}</p>
             </FadeUp>
           </div>
         </div>
@@ -46,8 +39,8 @@ export function Process() {
             style={{ scaleY }}
             aria-hidden
           />
-          {processSteps.map((step, i) => (
-            <li key={step.title} className="relative pb-16 pl-8 last:pb-0 sm:pl-14">
+          {t.process.steps.map((step, i) => (
+            <li key={i} className="relative pb-16 pl-8 last:pb-0 sm:pl-14">
               <motion.span
                 className="absolute -left-[5px] top-3 h-[11px] w-[11px] rounded-full border border-brass bg-ink"
                 initial={{ scale: 0 }}
@@ -58,7 +51,7 @@ export function Process() {
               />
               <FadeUp>
                 <span className="font-mono text-xs tracking-widest text-brass">
-                  Step {String(i + 1).padStart(2, "0")}
+                  {t.process.step} {String(i + 1).padStart(2, "0")}
                 </span>
                 <h3 className="mt-3 font-serif text-4xl leading-none tracking-tight sm:text-5xl">
                   {step.title}

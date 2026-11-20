@@ -2,9 +2,9 @@
 
 import { motion, useMotionTemplate, useMotionValue } from "motion/react";
 import type { PointerEvent } from "react";
-import { principles, site } from "@/lib/site";
 import { EASE } from "./Intro";
 import { FadeUp, RevealLines } from "./Reveal";
+import { headingLines, useCopy } from "./useCopy";
 
 function Card({ title, body, index }: { title: string; body: string; index: number }) {
   const mx = useMotionValue(-400);
@@ -54,6 +54,7 @@ function Card({ title, body, index }: { title: string; body: string; index: numb
 }
 
 export function Standard() {
+  const t = useCopy();
   return (
     <section id="standard" className="bg-ink py-28 sm:py-44">
       <div className="shell">
@@ -62,29 +63,22 @@ export function Standard() {
             <FadeUp>
               <p className="eyebrow mb-5 flex items-center gap-3">
                 <span className="h-px w-8 bg-brass" />
-                The standard
+                {t.standard.eyebrow}
               </p>
             </FadeUp>
             <RevealLines
               className="font-serif text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.95] tracking-[-0.02em]"
-              lines={[
-                <>The small things</>,
-                <>
-                  are <em className="text-brass">the whole point.</em>
-                </>,
-              ]}
+              lines={headingLines(t.standard.heading)}
             />
           </div>
           <FadeUp delay={0.15} className="md:col-span-4">
-            <p className="text-[1.0625rem] leading-relaxed text-sand">
-              Anyone can make a repair. {site.owner} makes it look like nothing was ever wrong.
-            </p>
+            <p className="text-[1.0625rem] leading-relaxed text-sand">{t.standard.body}</p>
           </FadeUp>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
-          {principles.map((p, i) => (
-            <Card key={p.title} title={p.title} body={p.body} index={i} />
+          {t.standard.principles.map((p, i) => (
+            <Card key={i} title={p.title} body={p.body} index={i} />
           ))}
         </div>
       </div>

@@ -3,10 +3,13 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { services, site, windows } from "@/lib/site";
+import { track } from "@/lib/track";
 import { Button } from "./Button";
 import { EASE } from "./Intro";
 import { Magnetic } from "./Magnetic";
 import { FadeUp, RevealLines } from "./Reveal";
+import { WINDOW_TEXT } from "@/lib/i18n";
+import { headingLines, useCopy, useLocale } from "./useCopy";
 
 type State =
   | { kind: "idle" }
@@ -56,6 +59,9 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 }
 
 export function Booking() {
+  const t = useCopy();
+  const locale = useLocale();
+  const b = t.booking;
   const [state, setState] = useState<State>({ kind: "idle" });
   const [service, setService] = useState("");
   const [win, setWin] = useState("");
@@ -68,15 +74,20 @@ export function Booking() {
       const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...Object.fromEntries(form), service, window: win }),
+        body: JSON.stringify({ ...Object.fromEntries(form), service, window: win, language: locale }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; booked?: boolean };
-      if (!res.ok) throw new Error(data.error ?? "Something went wrong. Please call or text us instead.");
+      if (!res.ok) {
+        // The server answers in English; Spanish visitors get the matching message in Spanish.
+        const local = res.status === 400 ? b.errorInvalid : res.status === 429 ? b.errorBusy : b.errorFailed;
+        throw new Error(locale === "en" ? (data.error ?? local) : local);
+      }
+      track("form_submit");
       setState({ kind: "done", booked: Boolean(data.booked) });
     } catch (err) {
       setState({
         kind: "error",
-        message: err instanceof Error ? err.message : "Something went wrong. Please call or text us instead.",
+        message: err instanceof Error && err.message !== "Failed to fetch" ? err.message : b.errorFailed,
       });
     }
   }
@@ -88,28 +99,20 @@ export function Booking() {
           <FadeUp>
             <p className="eyebrow mb-5 flex items-center gap-3">
               <span className="h-px w-8 bg-brass" />
-              Book a visit
+              {b.eyebrow}
             </p>
           </FadeUp>
           <RevealLines
             className="font-serif text-[clamp(2.75rem,7vw,6.5rem)] leading-[0.92] tracking-[-0.02em]"
-            lines={[
-              <>Let’s get</>,
-              <>
-                it <em className="text-brass">done.</em>
-              </>,
-            ]}
+            lines={headingLines(b.heading)}
           />
           <FadeUp delay={0.2}>
-            <p className="mt-8 max-w-sm text-[1.0625rem] leading-relaxed text-sand">
-              Tell us what you need and when suits you. {site.owner} will confirm your visit personally by
-              call or text.
-            </p>
+            <p className="mt-8 max-w-sm text-[1.0625rem] leading-relaxed text-sand">{b.body}</p>
           </FadeUp>
 
           <FadeUp delay={0.3} className="mt-12 space-y-6">
             <div>
-              <p className="eyebrow mb-2">Call or text</p>
+              <p className="eyebrow mb-2">{b.callOrText}</p>
               <Magnetic strength={0.15}>
                 <a
                   href={site.phoneHref}
@@ -120,7 +123,7 @@ export function Booking() {
               </Magnetic>
             </div>
             <div>
-              <p className="eyebrow mb-2">Email</p>
+              <p className="eyebrow mb-2">{b.email}</p>
               <a
                 href={`mailto:${site.email}`}
                 className="group relative inline-block break-all text-lg text-sand transition-colors duration-500 hover:text-bone"
@@ -130,8 +133,8 @@ export function Booking() {
               </a>
             </div>
             <div>
-              <p className="eyebrow mb-2">Hours</p>
-              <p className="text-lg text-sand">{site.hoursDisplay}</p>
+              <p className="eyebrow mb-2">{b.hours}</p>
+              <p className="text-lg text-sand">{t.hours}</p>
             </div>
           </FadeUp>
         </div>
@@ -173,40 +176,39 @@ export function Booking() {
                     />
                   </svg>
                   <h3 className="font-serif text-5xl leading-none tracking-tight">
-                    {state.booked ? "Visit requested." : "Request received."}
+                    {state.booked ? b.doneBooked : b.doneReceived}
                   </h3>
-                  <p className="mt-5 max-w-sm text-[1.0625rem] leading-relaxed text-sand">
-                    Thank you. {site.owner} will be in touch shortly by call or text to confirm the details.
-                  </p>
+                  <p className="mt-5 max-w-sm text-[1.0625rem] leading-relaxed text-sand">{b.doneBody}</p>
                   <button
                     type="button"
                     onClick={() => setState({ kind: "idle" })}
                     className="mt-10 text-sm text-brass underline-offset-4 hover:underline"
                   >
-                    Send another request
+                    {b.again}
                   </button>
                 </motion.div>
               ) : (
                 <motion.form
                   key="form"
                   onSubmit={onSubmit}
+                  onFocus={() => track("form_start", true)}
                   className="space-y-9"
                   exit={{ opacity: 0, y: -16 }}
                   transition={{ duration: 0.4 }}
                 >
                   <div className="grid gap-9 sm:grid-cols-2">
-                    <Field label="Your name">
+                    <Field label={b.name}>
                       <input
                         name="name"
                         required
                         minLength={2}
                         maxLength={120}
                         autoComplete="name"
-                        placeholder="Jane Doe"
+                        placeholder={b.namePlaceholder}
                         className={inputCls}
                       />
                     </Field>
-                    <Field label="Phone">
+                    <Field label={b.phone}>
                       <input
                         name="phone"
                         required
@@ -217,17 +219,17 @@ export function Booking() {
                         className={inputCls}
                       />
                     </Field>
-                    <Field label="Email (optional)">
+                    <Field label={b.emailField}>
                       <input
                         name="email"
                         type="email"
                         maxLength={200}
                         autoComplete="email"
-                        placeholder="you@email.com"
+                        placeholder={b.emailPlaceholder}
                         className={inputCls}
                       />
                     </Field>
-                    <Field label="City or address (optional)">
+                    <Field label={b.address}>
                       <input
                         name="address"
                         maxLength={200}
@@ -247,28 +249,29 @@ export function Booking() {
                   </div>
 
                   <fieldset>
-                    <legend className="eyebrow mb-4">What do you need?</legend>
+                    <legend className="eyebrow mb-4">{b.need}</legend>
                     <div className="flex flex-wrap gap-2">
-                      {services.map((s) => (
+                      {/* The saved value stays in English so the dashboard reads the same in either language. */}
+                      {services.map((s, i) => (
                         <Chip
                           key={s.id}
                           active={service === s.title}
                           onClick={() => setService(service === s.title ? "" : s.title)}
                         >
-                          {s.title}
+                          {t.services.list[i]?.title ?? s.title}
                         </Chip>
                       ))}
                       <Chip
                         active={service === "Something else"}
                         onClick={() => setService(service === "Something else" ? "" : "Something else")}
                       >
-                        Something else
+                        {b.somethingElse}
                       </Chip>
                     </div>
                   </fieldset>
 
                   <div className="grid gap-9 sm:grid-cols-2">
-                    <Field label="Preferred day (optional)">
+                    <Field label={b.day}>
                       <input
                         name="date"
                         type="date"
@@ -280,7 +283,7 @@ export function Booking() {
                       />
                     </Field>
                     <fieldset>
-                      <legend className="eyebrow mb-3">Time of day</legend>
+                      <legend className="eyebrow mb-3">{b.time}</legend>
                       <div className="flex flex-wrap gap-2">
                         {windows.map((w) => (
                           <Chip
@@ -288,30 +291,28 @@ export function Booking() {
                             active={win === w.id}
                             onClick={() => setWin(win === w.id ? "" : w.id)}
                           >
-                            {w.label}
+                            {WINDOW_TEXT[locale][w.id].label}
                           </Chip>
                         ))}
                       </div>
                     </fieldset>
                   </div>
 
-                  <Field label="Tell us about the job">
+                  <Field label={b.details}>
                     <textarea
                       name="details"
                       rows={3}
                       maxLength={3000}
-                      placeholder="A few words about what needs doing"
+                      placeholder={b.detailsPlaceholder}
                       className={`${inputCls} resize-none`}
                     />
                   </Field>
 
                   <div className="flex flex-wrap items-center justify-between gap-5 pt-2">
                     <Button type="submit" disabled={state.kind === "sending"}>
-                      {state.kind === "sending" ? "Sending" : "Request a visit"}
+                      {state.kind === "sending" ? b.sending : b.submit}
                     </Button>
-                    <p className="max-w-[16rem] text-xs leading-relaxed text-dust">
-                      We only use your details to get back to you about your project.
-                    </p>
+                    <p className="max-w-[16rem] text-xs leading-relaxed text-dust">{b.privacy}</p>
                   </div>
 
                   {state.kind === "error" && (

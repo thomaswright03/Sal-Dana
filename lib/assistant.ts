@@ -1,31 +1,16 @@
 import "server-only";
 import type Anthropic from "@anthropic-ai/sdk";
+import type { ToolOutcome } from "./assistant-stream";
 import { z } from "zod";
+import type { Locale } from "./i18n";
 import { checkDay, formatDate, todayInPhoenix, windowLabel } from "./schedule";
 import { services, site, windows } from "./site";
 import { createLead, listLeads } from "./store";
 import { dateSchema, phoneSchema, windowSchema } from "./validation";
 
-export const DEFAULT_MODEL = "claude-fable-5-2";
+export { assistantModel, DEFAULT_MODEL } from "./assistant-stream";
 
-/** Models that accept the server-side refusal fallback parameter. */
-const FALLBACK_MODELS = new Set([
-  "claude-fable-5-2",
-  "claude-fable-5-1",
-  "claude-opus-5-5",
-  "claude-opus-5",
-  "claude-sonnet-5-5",
-]);
-
-export function assistantModel(): string {
-  return process.env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL;
-}
-
-export function supportsFallbacks(model: string): boolean {
-  return FALLBACK_MODELS.has(model);
-}
-
-export function systemPrompt(): string {
+export function systemPrompt(locale: Locale = "en"): string {
   const today = todayInPhoenix();
   return `You are the booking assistant on the website of ${site.legalName}, the handyman and renovation business run by ${site.owner} in ${site.state}. Visitors chat with you in a small window in the corner of the site. Your job is to answer their questions and help them request a visit.
 
@@ -39,6 +24,11 @@ About the business
 - Services:
 ${services.map((s) => `  - ${s.title}: ${s.items.join(", ")}`).join("\n")}
 - Visit windows: ${windows.map((w) => `${w.label} (${w.range})`).join(", ")}.
+
+Language
+- Reply in the language the visitor writes in, English or Spanish. This visitor is on the ${locale === "es" ? "Spanish" : "English"} version of the site, so use ${locale === "es" ? "Spanish" : "English"} until their own messages show they prefer the other.
+- In Spanish, write natural, friendly Spanish as spoken in Arizona, addressing the visitor as "tú".
+- When you save a request, pass the visitor's language in the tool's language field, use one of the service names listed above for the service when one fits, and keep the details in the visitor's own words.
 
 How to help
 - Write the way a thoughtful front-of-house person would speak: warm, brief, plain. Two or three short sentences per reply is usually right. Plain text only, because the chat window doesn't render markdown. Ask for one or two things at a time.
@@ -84,6 +74,11 @@ export const tools: Anthropic.Beta.BetaTool[] = [
         details: { type: "string", description: "What the visitor needs done, in their words." },
         date: { type: "string", description: "Requested day, as YYYY-MM-DD." },
         window: { type: "string", enum: ["morning", "midday", "afternoon"] },
+        language: {
+          type: "string",
+          enum: ["en", "es"],
+          description: "The language the visitor is writing in.",
+        },
       },
       required: ["name", "phone", "service", "details", "date", "window"],
       additionalProperties: false,
@@ -101,6 +96,11 @@ export const tools: Anthropic.Beta.BetaTool[] = [
         email: { type: "string" },
         service: { type: "string", description: "Short label for the kind of work, if known." },
         details: { type: "string", description: "What they need or what they'd like Alan to answer." },
+        language: {
+          type: "string",
+          enum: ["en", "es"],
+          description: "The language the visitor is writing in.",
+        },
       },
       required: ["name", "phone", "details"],
       additionalProperties: false,
@@ -120,6 +120,7 @@ const bookInput = z.object({
   details: clean(3000).min(1),
   date: dateSchema,
   window: windowSchema,
+  language: z.enum(["en", "es"]).optional(),
 });
 const callbackInput = z.object({
   name: clean(120).min(2),
@@ -127,16 +128,12 @@ const callbackInput = z.object({
   email: clean(200).optional(),
   service: clean(120).optional(),
   details: clean(3000).min(1),
+  language: z.enum(["en", "es"]).optional(),
 });
 
-export interface ToolOutcome {
-  content: string;
-  isError?: boolean;
-  /** Shown to the visitor as a confirmation card. */
-  event?: { type: "booked"; date: string; dateLabel: string; window: string } | { type: "callback" };
-}
-
 export interface ToolContext {
+  /** The language of the page the visitor is chatting from. */
+  locale: Locale;
   transcript: string;
   /** Returns false once this visitor has saved too many requests. */
   allowWrite: () => boolean;
@@ -157,7 +154,7 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext): P
       if (day.open.length === 0)
         return { content: `${formatDate(parsed.data.date)} is fully booked. Suggest another day.` };
       return {
-        content: `Open on ${formatDate(parsed.data.date)}: ${day.open.map(windowLabel).join(", ")}.`,
+        content: `Open on ${formatDate(parsed.data.date)}: ${day.open.map((w) => windowLabel(w)).join(", ")}.`,
       };
     }
 
@@ -170,7 +167,7 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext): P
       if (!day.open.includes(d.window)) {
         return {
           content: day.open.length
-            ? `That window is taken. Still open on ${formatDate(d.date)}: ${day.open.map(windowLabel).join(", ")}.`
+            ? `That window is taken. Still open on ${formatDate(d.date)}: ${day.open.map((w) => windowLabel(w)).join(", ")}.`
             : `${formatDate(d.date)} is fully booked. Suggest another day.`,
           isError: true,
         };
@@ -190,14 +187,15 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext): P
         source: "ai-assistant",
         appointment: { date: d.date, window: d.window, status: "requested" },
         transcript: ctx.transcript,
+        language: d.language ?? ctx.locale,
       });
       return {
         content: `Saved. Visit requested for ${formatDate(d.date)}, ${windowLabel(d.window)}. Alan will confirm by call or text.`,
         event: {
           type: "booked",
           date: d.date,
-          dateLabel: formatDate(d.date),
-          window: windowLabel(d.window),
+          dateLabel: formatDate(d.date, d.language ?? ctx.locale),
+          window: windowLabel(d.window, d.language ?? ctx.locale),
         },
       };
     }
@@ -220,6 +218,7 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext): P
         source: "ai-assistant",
         note: "Asked for a call back.",
         transcript: ctx.transcript,
+        language: d.language ?? ctx.locale,
       });
       return { content: "Saved. Alan will call or text them back.", event: { type: "callback" } };
     }
