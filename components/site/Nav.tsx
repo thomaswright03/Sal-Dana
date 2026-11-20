@@ -2,20 +2,18 @@
 
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
 import { useEffect, useState } from "react";
-import { DEMO_MODE } from "@/lib/demo";
 import { site } from "@/lib/site";
 import { EASE, EASE_IN_OUT, useIntroDone } from "./Intro";
 import { Magnetic } from "./Magnetic";
 
-const links = [
-  { href: "#services", label: "Services" },
-  { href: "#process", label: "Process" },
-  { href: "#standard", label: "Standard" },
-  ...(DEMO_MODE ? [{ href: "#reviews", label: "Reviews" }] : []),
-  { href: "#faq", label: "Questions" },
-];
-
-export function Nav() {
+export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
+  const links = [
+    { href: "#services", label: "Services" },
+    { href: "#process", label: "Process" },
+    { href: "#standard", label: "Standard" },
+    ...(hasReviews ? [{ href: "#reviews", label: "Reviews" }] : []),
+    { href: "#faq", label: "Questions" },
+  ];
   const ready = useIntroDone();
   const { scrollY } = useScroll();
   const [hidden, setHidden] = useState(false);

@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { site } from "@/lib/site";
+import { track } from "@/lib/track";
 import { EASE, useIntroDone } from "./Intro";
 
 type Card = { type: "booked"; dateLabel: string; window: string } | { type: "callback" };
@@ -148,7 +149,10 @@ export function Chat() {
         {ready && !open && (
           <motion.button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              track("chat_open", true);
+              setOpen(true);
+            }}
             className="group fixed bottom-5 right-5 z-[70] flex items-center gap-3 rounded-full border border-brass/40 bg-coal/90 py-3 pl-4 pr-5 text-sm shadow-[0_20px_60px_-15px_rgb(0_0_0/0.8)] backdrop-blur-xl transition-colors duration-500 hover:border-brass sm:bottom-7 sm:right-7"
             initial={{ opacity: 0, y: 30, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

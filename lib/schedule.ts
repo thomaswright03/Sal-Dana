@@ -1,3 +1,4 @@
+import { WINDOW_TEXT, type Locale } from "./i18n";
 import { site, windows, type WindowId } from "./site";
 import type { Lead } from "./types";
 
@@ -16,13 +17,14 @@ export function weekday(date: string): number {
   return new Date(`${date}T12:00:00Z`).getUTCDay();
 }
 
-export function formatDate(date: string): string {
-  return new Intl.DateTimeFormat("en-US", {
+export function formatDate(date: string, locale: Locale = "en"): string {
+  const text = new Intl.DateTimeFormat(locale === "es" ? "es-US" : "en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
     timeZone: "UTC",
   }).format(new Date(`${date}T12:00:00Z`));
+  return locale === "es" ? text.charAt(0).toUpperCase() + text.slice(1) : text;
 }
 
 export type DayCheck = { ok: true; open: WindowId[] } | { ok: false; reason: string };
@@ -47,7 +49,7 @@ export function checkDay(date: string, leads: Lead[]): DayCheck {
   return { ok: true, open: windows.map((w) => w.id).filter((id) => !taken.has(id)) };
 }
 
-export function windowLabel(id: WindowId): string {
-  const w = windows.find((x) => x.id === id);
+export function windowLabel(id: WindowId, locale: Locale = "en"): string {
+  const w = WINDOW_TEXT[locale][id];
   return w ? `${w.label} (${w.range})` : id;
 }

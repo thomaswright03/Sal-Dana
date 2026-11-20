@@ -9,10 +9,11 @@ import { Reviews } from "@/components/site/Reviews";
 import { Process } from "@/components/site/Process";
 import { Services } from "@/components/site/Services";
 import { Standard } from "@/components/site/Standard";
-import { DEMO_MODE, sampleReviews } from "@/lib/demo";
+import { getPublishedReviews } from "@/lib/site-reviews";
 import { services } from "@/lib/site";
 
-export default function Home() {
+export default async function Home() {
+  const reviews = await getPublishedReviews();
   return (
     <>
       <main>
@@ -22,8 +23,8 @@ export default function Home() {
         <Services />
         <Process />
         <Standard />
-        {/* Until real reviews are added, this section only appears in preview mode. */}
-        {DEMO_MODE && <Reviews reviews={sampleReviews} />}
+        {/* Appears once the owner has switched on at least one review in the dashboard. */}
+        {reviews.length > 0 && <Reviews reviews={reviews} />}
         <Area />
         <Booking />
         <Faq />

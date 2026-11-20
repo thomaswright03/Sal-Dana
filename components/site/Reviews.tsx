@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { DEMO_MODE, type Review } from "@/lib/demo";
+import type { PublicReview } from "@/lib/types";
 import { EASE } from "./Intro";
 import { FadeUp, RevealLines } from "./Reveal";
 
@@ -13,7 +13,12 @@ function Star({ className = "" }: { className?: string }) {
   );
 }
 
-function Card({ review }: { review: Review }) {
+const monthYear = (date: string) =>
+  new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" }).format(
+    new Date(`${date}T12:00:00Z`),
+  );
+
+function Card({ review }: { review: PublicReview }) {
   return (
     <figure
       data-cursor="hover"
@@ -21,13 +26,13 @@ function Card({ review }: { review: Review }) {
     >
       <div>
         <div className="flex items-center justify-between">
-          <div className="flex gap-1 text-brass" role="img" aria-label="5 out of 5 stars">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <Star key={i} className="h-3.5 w-3.5" />
+          <div className="flex gap-1" role="img" aria-label={`${review.rating} out of 5 stars`}>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star key={i} className={`h-3.5 w-3.5 ${i <= review.rating ? "text-brass" : "text-bone/15"}`} />
             ))}
           </div>
           <span className="font-mono text-[0.625rem] uppercase tracking-[0.18em] text-dust">
-            {review.when}
+            {monthYear(review.date)}
           </span>
         </div>
         <blockquote className="mt-6 font-serif text-[1.375rem] leading-[1.3] tracking-[-0.005em] text-bone/90">
@@ -41,7 +46,7 @@ function Card({ review }: { review: Review }) {
         <span>
           <span className="block text-sm text-bone">{review.name}</span>
           <span className="block text-xs text-dust">
-            {review.city} · {review.service}
+            {[review.city, review.service].filter(Boolean).join(" · ")}
           </span>
         </span>
       </figcaption>
@@ -50,13 +55,13 @@ function Card({ review }: { review: Review }) {
 }
 
 /** One endless row of review cards. Pauses while hovered or focused. */
-function Row({ reviews, reverse = false }: { reviews: Review[]; reverse?: boolean }) {
+function Row({ reviews, reverse = false }: { reviews: PublicReview[]; reverse?: boolean }) {
   const reduce = useReducedMotion();
   if (reduce) {
     return (
       <div className="flex gap-5 overflow-x-auto px-[clamp(1.25rem,4vw,4rem)] pb-2">
         {reviews.map((r) => (
-          <Card key={r.name} review={r} />
+          <Card key={r.id} review={r} />
         ))}
       </div>
     );
@@ -77,8 +82,13 @@ function Row({ reviews, reverse = false }: { reviews: Review[]; reverse?: boolea
   );
 }
 
-export function Reviews({ reviews }: { reviews: Review[] }) {
+export function Reviews({ reviews }: { reviews: PublicReview[] }) {
   const half = Math.ceil(reviews.length / 2);
+  const average = reviews.reduce((n, r) => n + r.rating, 0) / Math.max(reviews.length, 1);
+  const sample = reviews.some((r) => r.demo);
+  const allGoogle = reviews.every((r) => r.source === "google");
+  // A moving row needs enough cards to fill the screen; a few reviews sit still instead.
+  const few = reviews.length < 4;
 
   return (
     <section id="reviews" className="overflow-hidden border-t border-line bg-coal py-28 sm:py-40">
@@ -88,7 +98,7 @@ export function Reviews({ reviews }: { reviews: Review[] }) {
             <p className="eyebrow mb-5 flex flex-wrap items-center gap-3">
               <span className="h-px w-8 bg-brass" />
               Reviews
-              {DEMO_MODE && (
+              {sample && (
                 <span className="rounded-full border border-brass/40 px-2.5 py-1 text-[0.5625rem] tracking-[0.18em] text-brass">
                   Sample reviews for preview
                 </span>
@@ -108,7 +118,9 @@ export function Reviews({ reviews }: { reviews: Review[] }) {
 
         <FadeUp delay={0.15} className="md:col-span-4 md:col-start-9">
           <div className="flex items-end gap-5">
-            <span className="font-serif text-[5.5rem] leading-[0.8] tracking-tight">5.0</span>
+            <span className="font-serif text-[5.5rem] leading-[0.8] tracking-tight">
+              {average.toFixed(1)}
+            </span>
             <div className="pb-1">
               <motion.div
                 className="flex gap-1 text-brass"
@@ -134,7 +146,9 @@ export function Reviews({ reviews }: { reviews: Review[] }) {
                   </motion.span>
                 ))}
               </motion.div>
-              <p className="mt-2 text-sm text-sand">Reviews on Google</p>
+              <p className="mt-2 text-sm text-sand">
+                {allGoogle ? "Reviews on Google" : `From ${reviews.length} customer reviews`}
+              </p>
             </div>
           </div>
         </FadeUp>
@@ -147,8 +161,18 @@ export function Reviews({ reviews }: { reviews: Review[] }) {
         viewport={{ once: true, margin: "-10% 0px" }}
         transition={{ duration: 1.1, ease: EASE }}
       >
-        <Row reviews={reviews.slice(0, half)} />
-        <Row reviews={reviews.slice(half)} reverse />
+        {few ? (
+          <div className="shell flex flex-wrap justify-center gap-5">
+            {reviews.map((r) => (
+              <Card key={r.id} review={r} />
+            ))}
+          </div>
+        ) : (
+          <>
+            <Row reviews={reviews.slice(0, half)} />
+            <Row reviews={reviews.slice(half)} reverse />
+          </>
+        )}
       </motion.div>
     </section>
   );

@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { services, site, windows } from "@/lib/site";
+import { track } from "@/lib/track";
 import { Button } from "./Button";
 import { EASE } from "./Intro";
 import { Magnetic } from "./Magnetic";
@@ -72,6 +73,7 @@ export function Booking() {
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; booked?: boolean };
       if (!res.ok) throw new Error(data.error ?? "Something went wrong. Please call or text us instead.");
+      track("form_submit");
       setState({ kind: "done", booked: Boolean(data.booked) });
     } catch (err) {
       setState({
@@ -190,6 +192,7 @@ export function Booking() {
                 <motion.form
                   key="form"
                   onSubmit={onSubmit}
+                  onFocus={() => track("form_start", true)}
                   className="space-y-9"
                   exit={{ opacity: 0, y: -16 }}
                   transition={{ duration: 0.4 }}

@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "./auth";
-import { StorageNotConfiguredError } from "./store";
+import { StorageNotConfiguredError } from "./kv";
 
 /** Defence in depth: route handlers re-check the session the proxy already checked. */
 export async function requireOwner(): Promise<NextResponse | null> {
