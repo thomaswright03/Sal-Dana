@@ -5,8 +5,13 @@ import { useRef } from "react";
 import { site } from "@/lib/site";
 import { Button } from "./Button";
 import { FadeUp } from "./Reveal";
+import { LOCALE_NAMES, LOCALE_PATHS } from "@/lib/i18n";
+import { useCopy, useLocale } from "./useCopy";
 
 export function Footer() {
+  const t = useCopy();
+  const locale = useLocale();
+  const other = locale === "en" ? "es" : "en";
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end end"] });
   const y = useTransform(scrollYProgress, [0, 1], ["45%", "0%"]);
@@ -18,20 +23,20 @@ export function Footer() {
         <div className="flex flex-col items-start justify-between gap-10 border-b border-line pb-16 md:flex-row md:items-end">
           <FadeUp>
             <p className="max-w-xl font-serif text-[clamp(2rem,4.5vw,4rem)] leading-[1] tracking-[-0.02em]">
-              Something at home needs doing <em className="text-brass">well?</em>
+              {t.footer.lead} <em className="text-brass">{t.footer.accent}</em>
             </p>
           </FadeUp>
           <FadeUp delay={0.15} className="flex flex-wrap gap-3">
-            <Button href="#book">Book a visit</Button>
+            <Button href="#book">{t.bookCta}</Button>
             <Button href={site.smsHref} variant="ghost">
-              Send a text
+              {t.footer.text}
             </Button>
           </FadeUp>
         </div>
 
         <div className="grid gap-10 py-14 text-sm sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <p className="eyebrow mb-4">Contact</p>
+            <p className="eyebrow mb-4">{t.footer.contact}</p>
             <a href={site.phoneHref} className="block text-sand transition-colors hover:text-brass">
               {site.phoneDisplay}
             </a>
@@ -43,23 +48,23 @@ export function Footer() {
             </a>
           </div>
           <div>
-            <p className="eyebrow mb-4">Hours</p>
-            <p className="text-sand">{site.hoursDisplay}</p>
+            <p className="eyebrow mb-4">{t.footer.hours}</p>
+            <p className="text-sand">{t.hours}</p>
           </div>
           <div>
-            <p className="eyebrow mb-4">Area</p>
+            <p className="eyebrow mb-4">{t.footer.area}</p>
             <p className="text-sand">
-              {site.region}, {site.state}
+              {t.region}, {site.state}
             </p>
           </div>
           <div>
-            <p className="eyebrow mb-4">Explore</p>
+            <p className="eyebrow mb-4">{t.footer.explore}</p>
             <ul className="space-y-1 text-sand">
               {[
-                ["#services", "Services"],
-                ["#process", "Process"],
-                ["#standard", "Standard"],
-                ["#faq", "Questions"],
+                ["#services", t.nav.services],
+                ["#process", t.nav.process],
+                ["#standard", t.nav.standard],
+                ["#faq", t.nav.questions],
               ].map(([href, label]) => (
                 <li key={href}>
                   <a href={href} className="transition-colors hover:text-brass">
@@ -67,6 +72,16 @@ export function Footer() {
                   </a>
                 </li>
               ))}
+              <li>
+                <a
+                  href={LOCALE_PATHS[other]}
+                  hrefLang={other}
+                  lang={other}
+                  className="transition-colors hover:text-brass"
+                >
+                  {LOCALE_NAMES[other]}
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -84,9 +99,11 @@ export function Footer() {
 
       <div className="relative border-t border-line bg-ink">
         <div className="shell flex flex-col gap-2 py-6 text-xs text-dust sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 {site.legalName}. A registered Arizona limited liability company.</p>
+          <p>
+            © 2026 {site.legalName}. {t.footer.legal}
+          </p>
           <a href="/crm" className="transition-colors hover:text-brass">
-            Owner sign-in
+            {t.footer.owner}
           </a>
         </div>
       </div>

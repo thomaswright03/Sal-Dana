@@ -46,6 +46,7 @@ export async function POST(req: Request) {
       service: data.service,
       details: data.details,
       source: "website-form",
+      language: data.language,
       appointment,
       note,
     });

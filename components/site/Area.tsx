@@ -5,8 +5,10 @@ import { useRef } from "react";
 import { site } from "@/lib/site";
 import { EASE } from "./Intro";
 import { FadeUp } from "./Reveal";
+import { useCopy } from "./useCopy";
 
 export function Area() {
+  const t = useCopy();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const sunY = useTransform(scrollYProgress, [0, 1], ["35%", "-25%"]);
@@ -22,7 +24,7 @@ export function Area() {
       />
       <div className="shell relative text-center">
         <FadeUp>
-          <p className="eyebrow mb-10">Where we work · {site.state}</p>
+          <p className="eyebrow mb-10">{t.area.eyebrow}</p>
         </FadeUp>
         <motion.ul
           className="mx-auto flex max-w-6xl flex-wrap items-baseline justify-center gap-x-5 gap-y-1 sm:gap-x-8"
@@ -52,9 +54,7 @@ export function Area() {
           ))}
         </motion.ul>
         <FadeUp delay={0.3}>
-          <p className="mx-auto mt-10 max-w-md text-[1.0625rem] leading-relaxed text-sand">
-            Serving {site.region}. Somewhere nearby that isn’t listed? Ask. The answer is usually yes.
-          </p>
+          <p className="mx-auto mt-10 max-w-md text-[1.0625rem] leading-relaxed text-sand">{t.area.body}</p>
         </FadeUp>
       </div>
     </section>

@@ -2,9 +2,9 @@
 
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { services } from "@/lib/site";
 import { FadeUp, RevealLines } from "./Reveal";
 import { ServiceArt } from "./ServiceArt";
+import { headingLines, useCopy } from "./useCopy";
 
 /**
  * On wide screens the section pins and vertical scrolling drives a horizontal
@@ -12,6 +12,8 @@ import { ServiceArt } from "./ServiceArt";
  */
 export function Services() {
   const reduce = useReducedMotion();
+  const t = useCopy();
+  const services = t.services.list;
   const section = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const [distance, setDistance] = useState(0);
@@ -55,24 +57,21 @@ export function Services() {
             <FadeUp>
               <p className="eyebrow mb-5 flex items-center gap-3">
                 <span className="h-px w-8 bg-brass" />
-                What we do
+                {t.services.eyebrow}
               </p>
             </FadeUp>
             <RevealLines
               className="font-serif text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.95] tracking-[-0.02em]"
-              lines={[
-                <>One call for</>,
-                <>
-                  <em className="text-brass">the whole list.</em>
-                </>,
-              ]}
+              lines={headingLines(t.services.heading)}
             />
           </div>
           {pinned && (
             <div className="hidden w-56 pb-3 lg:block">
               <div className="eyebrow mb-3 flex justify-between">
-                <span>Scroll</span>
-                <span>{String(services.length).padStart(2, "0")} services</span>
+                <span>{t.scroll}</span>
+                <span>
+                  {String(services.length).padStart(2, "0")} {t.services.count}
+                </span>
               </div>
               <div className="h-px w-full bg-line">
                 <motion.div className="h-px origin-left bg-brass" style={{ scaleX: bar }} />
@@ -128,16 +127,18 @@ export function Services() {
           <a
             href="#book"
             data-cursor="hover"
-            data-cursor-label="Book"
+            data-cursor-label={t.services.other.cursor}
             className={`group flex flex-col justify-between rounded-[1.25rem] bg-brass p-8 text-ink ${
               pinned ? "h-[min(60vh,560px)] w-[min(78vw,400px)] shrink-0" : "min-h-72 sm:col-span-2"
             }`}
           >
-            <span className="font-mono text-xs uppercase tracking-widest">Not on the list?</span>
+            <span className="font-mono text-xs uppercase tracking-widest">{t.services.other.eyebrow}</span>
             <span>
-              <span className="block font-serif text-5xl leading-[0.95] tracking-tight">Ask anyway.</span>
+              <span className="block font-serif text-5xl leading-[0.95] tracking-tight">
+                {t.services.other.title}
+              </span>
               <span className="mt-4 block max-w-xs text-sm leading-relaxed text-ink/70">
-                If it’s in or around your home and it needs doing well, tell us about it.
+                {t.services.other.body}
               </span>
             </span>
           </a>

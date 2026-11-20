@@ -4,6 +4,9 @@ import { motion, useReducedMotion } from "motion/react";
 import type { PublicReview } from "@/lib/types";
 import { EASE } from "./Intro";
 import { FadeUp, RevealLines } from "./Reveal";
+import type { Locale } from "@/lib/i18n";
+import { services } from "@/lib/site";
+import { headingLines, useCopy, useLocale } from "./useCopy";
 
 function Star({ className = "" }: { className?: string }) {
   return (
@@ -13,12 +16,19 @@ function Star({ className = "" }: { className?: string }) {
   );
 }
 
-const monthYear = (date: string) =>
-  new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" }).format(
-    new Date(`${date}T12:00:00Z`),
-  );
+const monthYear = (date: string, locale: Locale) =>
+  new Intl.DateTimeFormat(locale === "es" ? "es-US" : "en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T12:00:00Z`));
 
 function Card({ review }: { review: PublicReview }) {
+  const t = useCopy();
+  const locale = useLocale();
+  // Reviews keep the customer's own words; only the job label follows the page language.
+  const known = services.findIndex((x) => x.title === review.service);
+  const service = known >= 0 ? t.services.list[known].title : review.service;
   return (
     <figure
       data-cursor="hover"
@@ -26,13 +36,13 @@ function Card({ review }: { review: PublicReview }) {
     >
       <div>
         <div className="flex items-center justify-between">
-          <div className="flex gap-1" role="img" aria-label={`${review.rating} out of 5 stars`}>
+          <div className="flex gap-1" role="img" aria-label={t.reviews.stars(review.rating)}>
             {[1, 2, 3, 4, 5].map((i) => (
               <Star key={i} className={`h-3.5 w-3.5 ${i <= review.rating ? "text-brass" : "text-bone/15"}`} />
             ))}
           </div>
           <span className="font-mono text-[0.625rem] uppercase tracking-[0.18em] text-dust">
-            {monthYear(review.date)}
+            {monthYear(review.date, locale)}
           </span>
         </div>
         <blockquote className="mt-6 font-serif text-[1.375rem] leading-[1.3] tracking-[-0.005em] text-bone/90">
@@ -46,7 +56,7 @@ function Card({ review }: { review: PublicReview }) {
         <span>
           <span className="block text-sm text-bone">{review.name}</span>
           <span className="block text-xs text-dust">
-            {[review.city, review.service].filter(Boolean).join(" · ")}
+            {[review.city, service].filter(Boolean).join(" · ")}
           </span>
         </span>
       </figcaption>
@@ -83,6 +93,7 @@ function Row({ reviews, reverse = false }: { reviews: PublicReview[]; reverse?: 
 }
 
 export function Reviews({ reviews }: { reviews: PublicReview[] }) {
+  const t = useCopy();
   const half = Math.ceil(reviews.length / 2);
   const average = reviews.reduce((n, r) => n + r.rating, 0) / Math.max(reviews.length, 1);
   const sample = reviews.some((r) => r.demo);
@@ -97,22 +108,17 @@ export function Reviews({ reviews }: { reviews: PublicReview[] }) {
           <FadeUp>
             <p className="eyebrow mb-5 flex flex-wrap items-center gap-3">
               <span className="h-px w-8 bg-brass" />
-              Reviews
+              {t.reviews.eyebrow}
               {sample && (
                 <span className="rounded-full border border-brass/40 px-2.5 py-1 text-[0.5625rem] tracking-[0.18em] text-brass">
-                  Sample reviews for preview
+                  {t.reviews.sample}
                 </span>
               )}
             </p>
           </FadeUp>
           <RevealLines
             className="font-serif text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.95] tracking-[-0.02em]"
-            lines={[
-              <>Word of mouth,</>,
-              <>
-                <em className="text-brass">written down.</em>
-              </>,
-            ]}
+            lines={headingLines(t.reviews.heading)}
           />
         </div>
 
@@ -147,7 +153,7 @@ export function Reviews({ reviews }: { reviews: PublicReview[] }) {
                 ))}
               </motion.div>
               <p className="mt-2 text-sm text-sand">
-                {allGoogle ? "Reviews on Google" : `From ${reviews.length} customer reviews`}
+                {allGoogle ? t.reviews.onGoogle : t.reviews.fromCount(reviews.length)}
               </p>
             </div>
           </div>

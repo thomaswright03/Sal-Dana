@@ -5,13 +5,20 @@ import { useEffect } from "react";
 import { localeFromPath } from "@/lib/i18n";
 import { track, trackView } from "@/lib/track";
 
-/** Counts page views and taps on the call, text and email links. Renders nothing. */
+/** Counts page views and taps on the call, text and email links, and sets the page language. Renders nothing. */
 export function Track() {
   const pathname = usePathname() ?? "/";
 
+  const locale = localeFromPath(pathname);
+
   useEffect(() => {
-    trackView(localeFromPath(pathname));
-  }, [pathname]);
+    // One layout serves both languages, so the page language is set here for screen readers and browsers.
+    document.documentElement.lang = locale;
+    trackView(locale);
+    return () => {
+      document.documentElement.lang = "en";
+    };
+  }, [locale]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {

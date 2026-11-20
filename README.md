@@ -2,7 +2,7 @@
 
 Marketing site, AI booking assistant, and CRM for Sal Dana Renovations LLC, Alan's handyman and renovation business in Arizona.
 
-- **Site** (`/`): animated single-page marketing site with a booking form.
+- **Site** (`/`, and `/es` in Spanish): animated single-page marketing site with a booking form. Every word visitors read lives in `lib/copy.ts`, in English and Spanish, with a language switch in the header and footer.
 - **Assistant**: a chat window on the site, powered by the Anthropic API, that answers questions and saves visit requests straight into the CRM. The same key powers Ask AI in the dashboard. Both stay off, with a clear message, until `ANTHROPIC_API_KEY` is set.
 - **Owner dashboard** (`/crm`): password-protected. Overview with visitors, requests, a visitor-to-job funnel and jobs won; Leads (table and pipeline board); Schedule (week calendar); Reviews (choose which appear on the site); Traffic; Ask AI (plain-language questions about the business's own records); Settings.
 - **Visitor counting**: the site counts its own visits through `/api/track` as anonymous daily totals. No cookies, no third-party trackers, nothing that identifies a person.
@@ -11,7 +11,7 @@ Built with Next.js (App Router), Tailwind CSS, Motion, and Lenis. Deployed on Ve
 
 ## Editing the content
 
-Almost everything a visitor reads lives in [`lib/site.ts`](lib/site.ts): phone, email, service list, service area, working hours, process steps, and FAQs. The assistant reads the same file, so it stays in step with the site.
+Almost everything a visitor reads lives in [`lib/site.ts`](lib/site.ts): phone, email, service list, service area, working hours, process steps, and FAQs. The assistant reads the same file, so it stays in step with the site. Interface text and the full Spanish version live in [`lib/copy.ts`](lib/copy.ts). When a service, FAQ, or step changes in `lib/site.ts`, update its Spanish counterpart in `lib/copy.ts` too.
 
 ## Environment variables
 

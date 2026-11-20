@@ -2,10 +2,8 @@
 
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { useRef } from "react";
-import { site } from "@/lib/site";
 import { FadeUp } from "./Reveal";
-
-const TEXT = `${site.name} is the work of one craftsman. ${site.owner} measures twice, protects your floors, and finishes by hand. Whether it’s a single stubborn door or a whole room made new, it gets the same patience, the same care, and the same eye for the details nobody else will notice.`;
+import { useCopy } from "./useCopy";
 
 function Word({
   children,
@@ -28,7 +26,8 @@ function Word({
 export function Manifesto() {
   const ref = useRef<HTMLParagraphElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.85", "end 0.45"] });
-  const words = TEXT.split(" ");
+  const t = useCopy();
+  const words = t.manifesto.text.split(" ");
 
   return (
     <section className="shell py-28 sm:py-44">
@@ -36,7 +35,7 @@ export function Manifesto() {
         <FadeUp className="md:col-span-3">
           <p className="eyebrow flex items-center gap-3">
             <span className="h-px w-8 bg-brass" />
-            The approach
+            {t.manifesto.eyebrow}
           </p>
         </FadeUp>
         <p

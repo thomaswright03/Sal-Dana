@@ -1,35 +1,10 @@
-import { Area } from "@/components/site/Area";
-import { Booking } from "@/components/site/Booking";
-import { Faq } from "@/components/site/Faq";
-import { Footer } from "@/components/site/Footer";
-import { Hero } from "@/components/site/Hero";
-import { Manifesto } from "@/components/site/Manifesto";
-import { Marquee } from "@/components/site/Marquee";
-import { Reviews } from "@/components/site/Reviews";
-import { Process } from "@/components/site/Process";
-import { Services } from "@/components/site/Services";
-import { Standard } from "@/components/site/Standard";
-import { getPublishedReviews } from "@/lib/site-reviews";
-import { services } from "@/lib/site";
+import type { Metadata } from "next";
+import { Home } from "@/components/site/Home";
 
-export default async function Home() {
-  const reviews = await getPublishedReviews();
-  return (
-    <>
-      <main>
-        <Hero />
-        <Marquee items={services.map((s) => s.title)} />
-        <Manifesto />
-        <Services />
-        <Process />
-        <Standard />
-        {/* Appears once the owner has switched on at least one review in the dashboard. */}
-        {reviews.length > 0 && <Reviews reviews={reviews} />}
-        <Area />
-        <Booking />
-        <Faq />
-      </main>
-      <Footer />
-    </>
-  );
+export const metadata: Metadata = {
+  alternates: { canonical: "/", languages: { en: "/", es: "/es", "x-default": "/" } },
+};
+
+export default function HomePage() {
+  return <Home locale="en" />;
 }

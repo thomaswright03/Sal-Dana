@@ -7,9 +7,11 @@ import { Button } from "./Button";
 import { EASE, useIntroDone } from "./Intro";
 import { FadeUp, RevealLines } from "./Reveal";
 import { ShaderCanvas } from "./ShaderCanvas";
+import { headingLines, useCopy } from "./useCopy";
 
 export function Hero() {
   const ready = useIntroDone();
+  const t = useCopy();
   const reduce = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -35,7 +37,7 @@ export function Hero() {
       >
         <FadeUp show={ready} delay={0.1} className="mb-6 flex items-center gap-3 sm:mb-8">
           <span className="h-1.5 w-1.5 rounded-full bg-brass animate-pulse-dot" />
-          <span className="eyebrow !text-sand">Handyman &amp; renovations · {site.region}</span>
+          <span className="eyebrow !text-sand">{t.hero.eyebrow}</span>
         </FadeUp>
 
         <RevealLines
@@ -44,27 +46,19 @@ export function Hero() {
           delay={0.15}
           stagger={0.11}
           className="font-serif text-[clamp(3.25rem,10.5vw,10.5rem)] leading-[0.92] tracking-[-0.02em]"
-          lines={[
-            <>Your home,</>,
-            <>
-              finished <em className="text-brass">properly.</em>
-            </>,
-          ]}
+          lines={headingLines(t.hero.heading)}
         />
 
         <div className="mt-8 grid gap-8 sm:mt-12 md:grid-cols-12 md:items-end">
           <FadeUp show={ready} delay={0.55} className="md:col-span-5">
-            <p className="max-w-md text-[1.0625rem] leading-relaxed text-sand">
-              Repairs, installs, and renovations by one craftsman who treats every detail as the one that
-              matters. Meet {site.owner}.
-            </p>
+            <p className="max-w-md text-[1.0625rem] leading-relaxed text-sand">{t.hero.body}</p>
           </FadeUp>
           <FadeUp
             show={ready}
             delay={0.7}
             className="flex flex-wrap items-center gap-3 md:col-span-7 md:justify-end"
           >
-            <Button href="#book">Book a visit</Button>
+            <Button href="#book">{t.bookCta}</Button>
             <Button href={site.phoneHref} variant="ghost">
               {site.phoneDisplay}
             </Button>
@@ -77,10 +71,10 @@ export function Hero() {
           animate={{ opacity: ready ? 1 : 0 }}
           transition={{ duration: 1.2, ease: EASE, delay: 1 }}
         >
-          <span className="eyebrow">Registered Arizona LLC</span>
-          <span className="eyebrow hidden sm:block">{site.hoursDisplay}</span>
+          <span className="eyebrow">{t.registered}</span>
+          <span className="eyebrow hidden sm:block">{t.hours}</span>
           <span className="eyebrow flex items-center gap-3">
-            Scroll
+            {t.scroll}
             <span className="relative block h-8 w-px overflow-hidden bg-bone/15">
               <motion.span
                 className="absolute inset-x-0 top-0 h-3 bg-brass"

@@ -5,14 +5,50 @@ import { useEffect, useState } from "react";
 import { site } from "@/lib/site";
 import { EASE, EASE_IN_OUT, useIntroDone } from "./Intro";
 import { Magnetic } from "./Magnetic";
+import { LOCALE_NAMES, LOCALE_PATHS, LOCALES } from "@/lib/i18n";
+import { useCopy, useLocale } from "./useCopy";
+
+function LanguageSwitch({ className = "" }: { className?: string }) {
+  const t = useCopy();
+  const locale = useLocale();
+  return (
+    <div
+      className={`flex items-center gap-1 font-mono text-[0.6875rem] tracking-widest ${className}`}
+      role="group"
+      aria-label={t.nav.language}
+    >
+      {LOCALES.map((l, i) => (
+        <span key={l} className="flex items-center gap-1">
+          {i > 0 && <span className="text-dust/60">/</span>}
+          {l === locale ? (
+            <span className="text-brass" aria-current="true">
+              {l.toUpperCase()}
+            </span>
+          ) : (
+            // A full page load, so each language gets a clean page of its own.
+            <a
+              href={LOCALE_PATHS[l]}
+              hrefLang={l}
+              aria-label={LOCALE_NAMES[l]}
+              className="text-dust transition-colors hover:text-bone"
+            >
+              {l.toUpperCase()}
+            </a>
+          )}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
+  const t = useCopy();
   const links = [
-    { href: "#services", label: "Services" },
-    { href: "#process", label: "Process" },
-    { href: "#standard", label: "Standard" },
-    ...(hasReviews ? [{ href: "#reviews", label: "Reviews" }] : []),
-    { href: "#faq", label: "Questions" },
+    { href: "#services", label: t.nav.services },
+    { href: "#process", label: t.nav.process },
+    { href: "#standard", label: t.nav.standard },
+    ...(hasReviews ? [{ href: "#reviews", label: t.nav.reviews }] : []),
+    { href: "#faq", label: t.nav.questions },
   ];
   const ready = useIntroDone();
   const { scrollY } = useScroll();
@@ -47,7 +83,7 @@ export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
           }`}
         >
           <div className="shell flex h-[72px] items-center justify-between">
-            <a href="#top" className="group flex items-baseline gap-2" aria-label={`${site.name} home`}>
+            <a href="#top" className="group flex items-baseline gap-2" aria-label={t.nav.home}>
               <span className="font-serif text-2xl leading-none tracking-tight">Sal Dana</span>
               <span className="eyebrow hidden transition-colors duration-500 group-hover:text-brass sm:inline">
                 Renovations
@@ -68,6 +104,7 @@ export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
             </nav>
 
             <div className="flex items-center gap-3">
+              <LanguageSwitch className="mr-1" />
               <a
                 href={site.phoneHref}
                 className="hidden font-mono text-xs tracking-wider text-sand transition-colors hover:text-brass lg:block"
@@ -81,7 +118,7 @@ export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
                 >
                   <span className="absolute inset-0 translate-y-[101%] rounded-full bg-brass transition-transform duration-700 ease-out-expo group-hover:translate-y-0" />
                   <span className="relative transition-colors duration-500 group-hover:text-ink">
-                    Book a visit
+                    {t.bookCta}
                   </span>
                 </a>
               </Magnetic>
@@ -90,7 +127,7 @@ export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
                 className="relative flex h-11 w-11 items-center justify-center rounded-full border border-bone/20 md:hidden"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
-                aria-label={open ? "Close menu" : "Open menu"}
+                aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
               >
                 <span
                   className={`absolute h-px w-4 bg-bone transition-transform duration-500 ease-out-expo ${open ? "rotate-45" : "-translate-y-[3px]"}`}
@@ -114,7 +151,7 @@ export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
             transition={{ duration: 0.8, ease: EASE_IN_OUT }}
           >
             <nav className="flex flex-col" aria-label="Mobile">
-              {[...links, { href: "#book", label: "Book a visit" }].map((l, i) => (
+              {[...links, { href: "#book", label: t.bookCta }].map((l, i) => (
                 <a
                   key={l.href}
                   href={l.href}
@@ -122,7 +159,7 @@ export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
                   className="overflow-hidden border-b border-line py-4"
                 >
                   <motion.span
-                    className="flex items-baseline justify-between font-serif text-5xl"
+                    className="flex items-baseline justify-between font-serif text-[clamp(2rem,11vw,3rem)]"
                     initial={{ y: "110%" }}
                     animate={{ y: 0 }}
                     transition={{ duration: 0.9, ease: EASE, delay: 0.25 + i * 0.06 }}
