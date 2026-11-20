@@ -50,6 +50,11 @@ async function readBlob(pathname: string): Promise<Lead | null> {
   return JSON.parse(text) as Lead;
 }
 
+/** Writes a complete lead record, replacing any existing one with the same id. */
+export async function saveLead(lead: Lead): Promise<void> {
+  return write(lead);
+}
+
 async function write(lead: Lead): Promise<void> {
   if (backend() === "blob") {
     await put(blobPath(lead.id), JSON.stringify(lead), {

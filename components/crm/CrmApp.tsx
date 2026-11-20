@@ -154,6 +154,27 @@ export function CrmApp() {
     };
   }, [leads]);
 
+  const demoCount = leads.filter((l) => l.demo).length;
+  const [demoBusy, setDemoBusy] = useState(false);
+  const demo = async (action: "load" | "clear") => {
+    setDemoBusy(true);
+    try {
+      const res = await fetch("/api/crm/demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const data = (await res.json()) as { leads?: Lead[]; error?: string };
+      if (!res.ok || !data.leads) throw new Error(data.error ?? "Couldn't update the sample data.");
+      setLeads(data.leads);
+      setSelected(null);
+      notify(action === "load" ? "Sample leads loaded." : "Sample leads removed.");
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "Couldn't update the sample data.");
+    }
+    setDemoBusy(false);
+  };
+
   const exportCsv = () => {
     const url = URL.createObjectURL(new Blob([toCsv(leads)], { type: "text/csv" }));
     const a = Object.assign(document.createElement("a"), {
@@ -179,6 +200,16 @@ export function CrmApp() {
           <span className="eyebrow">CRM</span>
         </Link>
         <div className="flex items-center gap-2">
+          {load.kind === "ready" && demoCount === 0 ? (
+            <button
+              type="button"
+              disabled={demoBusy}
+              onClick={() => demo("load")}
+              className="rounded-full border border-line px-4 py-2 text-xs text-sand transition-colors hover:border-bone/30 hover:text-bone disabled:opacity-50"
+            >
+              {demoBusy ? "Loading…" : "Load sample data"}
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={exportCsv}
@@ -195,6 +226,23 @@ export function CrmApp() {
           </button>
         </div>
       </header>
+
+      {demoCount > 0 ? (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-brass/30 bg-brass/10 px-5 py-3 text-sm text-bone">
+          <p>
+            <span className="eyebrow mr-2 text-brass">Preview</span>
+            {demoCount} of these leads are samples, not real customers.
+          </p>
+          <button
+            type="button"
+            disabled={demoBusy}
+            onClick={() => demo("clear")}
+            className="rounded-full border border-brass/40 px-4 py-1.5 text-xs text-bone transition-colors hover:bg-brass/20 disabled:opacity-50"
+          >
+            {demoBusy ? "Removing…" : "Remove sample data"}
+          </button>
+        </div>
+      ) : null}
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { DEMO_MODE } from "@/lib/demo";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -23,6 +24,8 @@ export const metadata: Metadata = {
     template: `%s | ${site.name}`,
   },
   description: site.description,
+  // Preview builds carry sample content, so keep them out of search results.
+  ...(DEMO_MODE ? { robots: { index: false, follow: false } } : {}),
   openGraph: {
     title: site.name,
     description: site.tagline,

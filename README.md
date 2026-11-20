@@ -23,6 +23,12 @@ Almost everything a visitor reads lives in [`lib/site.ts`](lib/site.ts): phone, 
 
 Copy `.env.example` to `.env.local` for local work. Never commit real values.
 
+## Preview mode and sample data
+
+Set `NEXT_PUBLIC_DEMO_MODE=1` to show a reviews section filled with sample reviews from `lib/demo.ts`. They are labelled as samples on the page and the whole site is marked `noindex` while the flag is on. Before launch, replace them with real reviews and remove the flag.
+
+In the CRM, "Load sample data" adds a set of example leads (from `lib/demo-leads.ts`) across every stage. They are flagged as samples and "Remove sample data" deletes only those, leaving real leads alone.
+
 ## Running locally
 
 ```bash

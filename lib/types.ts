@@ -54,4 +54,6 @@ export interface Lead {
   notes: Note[];
   /** Conversation with the AI assistant, when the lead came from chat */
   transcript: string | null;
+  /** True for sample leads loaded to preview the CRM */
+  demo?: boolean;
 }
