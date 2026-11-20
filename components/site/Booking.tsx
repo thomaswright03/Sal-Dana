@@ -1,0 +1,333 @@
+"use client";
+
+import { AnimatePresence, motion } from "motion/react";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { services, site, windows } from "@/lib/site";
+import { Button } from "./Button";
+import { EASE } from "./Intro";
+import { Magnetic } from "./Magnetic";
+import { FadeUp, RevealLines } from "./Reveal";
+
+type State =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "done"; booked: boolean }
+  | { kind: "error"; message: string };
+
+function Field({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={`group relative block ${className}`}>
+      <span className="eyebrow mb-2 block transition-colors duration-300 group-focus-within:text-brass">
+        {label}
+      </span>
+      {children}
+      <span className="absolute bottom-0 left-0 h-px w-full bg-line" />
+      <span className="absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-brass transition-transform duration-700 ease-out-expo group-focus-within:scale-x-100" />
+    </label>
+  );
+}
+
+const inputCls =
+  "w-full bg-transparent pb-3 text-lg text-bone placeholder:text-dust/60 outline-none focus-visible:outline-none";
+
+function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`rounded-full border px-4 py-2 text-[0.8125rem] transition-all duration-300 ${
+        active
+          ? "border-brass bg-brass text-ink"
+          : "border-line text-sand hover:border-bone/30 hover:text-bone"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function Booking() {
+  const [state, setState] = useState<State>({ kind: "idle" });
+  const [service, setService] = useState("");
+  const [win, setWin] = useState("");
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    setState({ kind: "sending" });
+    try {
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...Object.fromEntries(form), service, window: win }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string; booked?: boolean };
+      if (!res.ok) throw new Error(data.error ?? "Something went wrong. Please call or text us instead.");
+      setState({ kind: "done", booked: Boolean(data.booked) });
+    } catch (err) {
+      setState({
+        kind: "error",
+        message: err instanceof Error ? err.message : "Something went wrong. Please call or text us instead.",
+      });
+    }
+  }
+
+  return (
+    <section id="book" className="shell py-28 sm:py-44">
+      <div className="grid gap-16 lg:grid-cols-12">
+        <div className="lg:col-span-5">
+          <FadeUp>
+            <p className="eyebrow mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-brass" />
+              Book a visit
+            </p>
+          </FadeUp>
+          <RevealLines
+            className="font-serif text-[clamp(2.75rem,7vw,6.5rem)] leading-[0.92] tracking-[-0.02em]"
+            lines={[
+              <>Let’s get</>,
+              <>
+                it <em className="text-brass">done.</em>
+              </>,
+            ]}
+          />
+          <FadeUp delay={0.2}>
+            <p className="mt-8 max-w-sm text-[1.0625rem] leading-relaxed text-sand">
+              Tell us what you need and when suits you. {site.owner} will confirm your visit personally by
+              call or text.
+            </p>
+          </FadeUp>
+
+          <FadeUp delay={0.3} className="mt-12 space-y-6">
+            <div>
+              <p className="eyebrow mb-2">Call or text</p>
+              <Magnetic strength={0.15}>
+                <a
+                  href={site.phoneHref}
+                  className="font-serif text-4xl tracking-tight transition-colors duration-500 hover:text-brass sm:text-5xl"
+                >
+                  {site.phoneDisplay}
+                </a>
+              </Magnetic>
+            </div>
+            <div>
+              <p className="eyebrow mb-2">Email</p>
+              <a
+                href={`mailto:${site.email}`}
+                className="group relative inline-block break-all text-lg text-sand transition-colors duration-500 hover:text-bone"
+              >
+                {site.email}
+                <span className="absolute -bottom-1 left-0 h-px w-full origin-right scale-x-0 bg-brass transition-transform duration-500 ease-out-expo group-hover:origin-left group-hover:scale-x-100" />
+              </a>
+            </div>
+            <div>
+              <p className="eyebrow mb-2">Hours</p>
+              <p className="text-lg text-sand">{site.hoursDisplay}</p>
+            </div>
+          </FadeUp>
+        </div>
+
+        <FadeUp delay={0.15} className="lg:col-span-6 lg:col-start-7">
+          <div className="relative overflow-hidden rounded-[1.5rem] border border-line bg-coal p-7 sm:p-12">
+            <AnimatePresence mode="wait" initial={false}>
+              {state.kind === "done" ? (
+                <motion.div
+                  key="done"
+                  className="flex min-h-[520px] flex-col items-start justify-center"
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.9, ease: EASE }}
+                  role="status"
+                >
+                  <svg
+                    viewBox="0 0 80 80"
+                    className="mb-10 h-20 w-20 text-brass"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  >
+                    <motion.circle
+                      cx="40"
+                      cy="40"
+                      r="38"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 1.1, ease: EASE }}
+                    />
+                    <motion.path
+                      d="M25 41l10 10 20-22"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.7, ease: EASE, delay: 0.6 }}
+                    />
+                  </svg>
+                  <h3 className="font-serif text-5xl leading-none tracking-tight">
+                    {state.booked ? "Visit requested." : "Request received."}
+                  </h3>
+                  <p className="mt-5 max-w-sm text-[1.0625rem] leading-relaxed text-sand">
+                    Thank you. {site.owner} will be in touch shortly by call or text to confirm the details.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setState({ kind: "idle" })}
+                    className="mt-10 text-sm text-brass underline-offset-4 hover:underline"
+                  >
+                    Send another request
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="form"
+                  onSubmit={onSubmit}
+                  className="space-y-9"
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <div className="grid gap-9 sm:grid-cols-2">
+                    <Field label="Your name">
+                      <input
+                        name="name"
+                        required
+                        minLength={2}
+                        maxLength={120}
+                        autoComplete="name"
+                        placeholder="Jane Doe"
+                        className={inputCls}
+                      />
+                    </Field>
+                    <Field label="Phone">
+                      <input
+                        name="phone"
+                        required
+                        type="tel"
+                        maxLength={30}
+                        autoComplete="tel"
+                        placeholder="(480) 000-0000"
+                        className={inputCls}
+                      />
+                    </Field>
+                    <Field label="Email (optional)">
+                      <input
+                        name="email"
+                        type="email"
+                        maxLength={200}
+                        autoComplete="email"
+                        placeholder="you@email.com"
+                        className={inputCls}
+                      />
+                    </Field>
+                    <Field label="City or address (optional)">
+                      <input
+                        name="address"
+                        maxLength={200}
+                        autoComplete="street-address"
+                        placeholder="Scottsdale"
+                        className={inputCls}
+                      />
+                    </Field>
+                  </div>
+
+                  {/* Hidden from people; bots tend to fill it in. */}
+                  <div className="absolute -left-[9999px]" aria-hidden>
+                    <label>
+                      Company
+                      <input name="company" tabIndex={-1} autoComplete="off" />
+                    </label>
+                  </div>
+
+                  <fieldset>
+                    <legend className="eyebrow mb-4">What do you need?</legend>
+                    <div className="flex flex-wrap gap-2">
+                      {services.map((s) => (
+                        <Chip
+                          key={s.id}
+                          active={service === s.title}
+                          onClick={() => setService(service === s.title ? "" : s.title)}
+                        >
+                          {s.title}
+                        </Chip>
+                      ))}
+                      <Chip
+                        active={service === "Something else"}
+                        onClick={() => setService(service === "Something else" ? "" : "Something else")}
+                      >
+                        Something else
+                      </Chip>
+                    </div>
+                  </fieldset>
+
+                  <div className="grid gap-9 sm:grid-cols-2">
+                    <Field label="Preferred day (optional)">
+                      <input
+                        name="date"
+                        type="date"
+                        // Earliest bookable day is tomorrow; set on focus so it reflects the visitor's clock.
+                        onFocus={(e) => {
+                          e.currentTarget.min = new Date(Date.now() + 86_400_000).toLocaleDateString("en-CA");
+                        }}
+                        className={`${inputCls} [color-scheme:dark]`}
+                      />
+                    </Field>
+                    <fieldset>
+                      <legend className="eyebrow mb-3">Time of day</legend>
+                      <div className="flex flex-wrap gap-2">
+                        {windows.map((w) => (
+                          <Chip
+                            key={w.id}
+                            active={win === w.id}
+                            onClick={() => setWin(win === w.id ? "" : w.id)}
+                          >
+                            {w.label}
+                          </Chip>
+                        ))}
+                      </div>
+                    </fieldset>
+                  </div>
+
+                  <Field label="Tell us about the job">
+                    <textarea
+                      name="details"
+                      rows={3}
+                      maxLength={3000}
+                      placeholder="A few words about what needs doing"
+                      className={`${inputCls} resize-none`}
+                    />
+                  </Field>
+
+                  <div className="flex flex-wrap items-center justify-between gap-5 pt-2">
+                    <Button type="submit" disabled={state.kind === "sending"}>
+                      {state.kind === "sending" ? "Sending" : "Request a visit"}
+                    </Button>
+                    <p className="max-w-[16rem] text-xs leading-relaxed text-dust">
+                      We only use your details to get back to you about your project.
+                    </p>
+                  </div>
+
+                  {state.kind === "error" && (
+                    <p
+                      role="alert"
+                      className="rounded-xl border border-red-400/30 bg-red-400/5 px-4 py-3 text-sm text-red-200"
+                    >
+                      {state.message}
+                    </p>
+                  )}
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </div>
+        </FadeUp>
+      </div>
+    </section>
+  );
+}
