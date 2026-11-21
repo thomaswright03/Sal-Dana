@@ -11,6 +11,11 @@ Done: status.json now `{product, checked_at, overall, functions[{tier,name,statu
 ## Open
 - ANTHROPIC_API_KEY is not set anywhere the COO can reach (not in env, not in Vercel): the eval (`npm run eval`) has never run. Needs the key from Thomas; then set in Vercel prod+preview, run eval, record pass rate/cost here.
 - Needs Alan's lead email + a domain for Resend (EMAIL_FROM, LEAD_NOTIFY_EMAIL).
-- Not done (low): reviews/settings single documents; non-conditional lead edit check; tests for analyst, review routes, traffic, cronAllowed; branch protection once CI has run.
-- Restored leads with appointments don't recreate slot markers.
+- Not done (low): reviews/settings single documents; non-conditional lead edit check; tests for analyst, review routes, traffic, cronAllowed.
 - Earlier (legal): sample reviews removed before launch.
+
+## Excellence fix round 3 (2026-11-21), grade was 74
+Done: reduced-motion hydration (#418) fixed via `components/site/useReduced.ts` (false until mounted); live availability in the booking form (`GET /api/availability?date=`, taken windows disabled, reasons inline EN/ES, success screen names a taken time); field-level validation errors; atomic stale-edit check (`lead-versions/` write-if-absent markers in `lib/store.ts`); restore re-holds visit slots; note delete confirm; chat launcher waits until hero scrolls away; knip clean (only test stub); Latest update card rewritten (frontend first). 67 unit + 5 e2e tests (reduced-motion e2e added).
+Evidence (2026-11-21): CI green on 5d3c1f5 (run https://github.com/thomaswright03/Sal-Dana/actions/runs/44847112034). Branch protection on main requires "Lint, typecheck, test, build" and "End-to-end (Playwright)" (admins not enforced). Live reduced-motion load: 0 page errors. Live /admin/status.json overall=warning (expected: Anthropic key missing; email/backup/retention rows Unknown until first run), 13 functions listed.
+Rollback drill: Vercel rollback of production to b9675fc live in ~7s (availability route 404 again), promoted 5d3c1f5 back in ~7s.
+Not done: restore-from-real-Blob-snapshot drill (backup needs CRON_SECRET, not readable by COO; unit-tested only); forced-failure (unset RESEND_API_KEY) check on a preview; eval needs ANTHROPIC_API_KEY.

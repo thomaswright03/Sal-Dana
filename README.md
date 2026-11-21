@@ -103,6 +103,8 @@ conversations against the real API (skipped without a key).
 
 ## Deploy and rollback
 
+_Drill 2026-11-21:_ rolled production back to the previous deployment through the Vercel API and promoted the newest one again; each switch was live in about 7 seconds._
+
 Deploys are Vercel: pushing `main` builds and ships. Set the env vars above in the Vercel project first. To roll
 back, open the Vercel project > Deployments, pick the last good one and choose **Promote to Production** (or
 `vercel rollback`). Data is not part of a deploy; restore data from a backup as above.
