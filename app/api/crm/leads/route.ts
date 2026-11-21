@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireOwner, storageError } from "@/lib/crm-guard";
+import { claimForOwner, SlotTakenError } from "@/lib/slots";
 import { createLead, listLeads } from "@/lib/store";
+import { randomUUID } from "node:crypto";
 import { crmCreateSchema } from "@/lib/validation";
 
 export async function GET() {
@@ -21,9 +23,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid lead" }, { status: 400 });
   }
   try {
-    const lead = await createLead({ ...parsed.data, source: "manual" });
+    const { confirmDoubleBook, ...fields } = parsed.data;
+    const id = randomUUID();
+    await claimForOwner(fields.appointment, id, confirmDoubleBook);
+    const lead = await createLead({ ...fields, id, source: "manual" });
     return NextResponse.json({ lead }, { status: 201 });
   } catch (err) {
+    if (err instanceof SlotTakenError) return NextResponse.json({ error: err.message, code: "slot-taken" }, { status: 409 });
     return storageError(err);
   }
 }

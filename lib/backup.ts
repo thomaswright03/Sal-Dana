@@ -1,6 +1,7 @@
 import "server-only";
-import { listKeys, readJson, readJsonFrom, readMany, writeJson, writeJsonTo } from "./kv";
+import { listKeys, listKeysFrom, readJson, readJsonFrom, readMany, removeJson, removeJsonFrom, writeJson, writeJsonTo } from "./kv";
 import { recordOps } from "./ops";
+import { leadExpired } from "./retention";
 import { todayInPhoenix } from "./schedule";
 import type { Lead, Review } from "./types";
 
@@ -18,9 +19,12 @@ export interface Snapshot {
 }
 
 const backupKey = (date: string) => `backups/${date}.json`;
-const secondToken = () => process.env.BACKUP_BLOB_READ_WRITE_TOKEN || null;
+/** Daily snapshots kept in each store. Older ones are deleted, so storage stays bounded and leads removed by retention drop out of backups within this time. */
+export const KEEP_SNAPSHOTS = 30;
+export const secondStoreConfigured = () => Boolean(process.env.BACKUP_BLOB_READ_WRITE_TOKEN || process.env.BACKUP_READ_WRITE_TOKEN);
+const secondToken = () => process.env.BACKUP_BLOB_READ_WRITE_TOKEN || process.env.BACKUP_READ_WRITE_TOKEN || null;
 
-export async function runBackup(): Promise<{ date: string; leads: number; reviews: number; secondStore: boolean }> {
+export async function runBackup(): Promise<{ date: string; leads: number; reviews: number; secondStore: boolean; pruned: number }> {
   const date = todayInPhoenix();
   const leads = await readMany<Lead>(await listKeys("leads/"));
   const reviews = (await readJson<Review[]>("reviews.json")) ?? [];
@@ -28,7 +32,28 @@ export async function runBackup(): Promise<{ date: string; leads: number; review
   await writeJson(backupKey(date), snapshot);
   const token = secondToken();
   if (token) await writeJsonTo(token, backupKey(date), snapshot);
-  return { date, leads: leads.length, reviews: reviews.length, secondStore: Boolean(token) };
+  const pruned = await pruneBackups();
+  return { date, leads: leads.length, reviews: reviews.length, secondStore: Boolean(token), pruned };
+}
+
+const dateOf = (k: string) => k.replace(/^backups\//, "").replace(/\.json$/, "");
+
+/** Deletes snapshots beyond the newest KEEP_SNAPSHOTS, in both stores. Returns how many were removed. */
+export async function pruneBackups(keep = KEEP_SNAPSHOTS): Promise<number> {
+  const token = secondToken();
+  const stale = (keys: string[]) => keys.sort((a, b) => dateOf(b).localeCompare(dateOf(a))).slice(keep);
+  let removed = 0;
+  for (const k of stale(await listKeys("backups/"))) {
+    await removeJson(k);
+    removed++;
+  }
+  if (token) {
+    for (const k of stale(await listKeysFrom(token, "backups/"))) {
+      await removeJsonFrom(token, k);
+      removed++;
+    }
+  }
+  return removed;
 }
 
 /**
@@ -47,9 +72,11 @@ export async function restoreBackup(
       : await readJson<Snapshot>(backupKey(date));
   if (!snap) throw new Error(`No backup for ${date}`);
   const want = (id: string) => !opts.ids || opts.ids.includes(id);
+  const now = new Date();
   const existing = new Set(await listKeys("leads/"));
   let leads = 0;
-  for (const l of snap.leads.filter((x) => want(x.id))) {
+  // Leads older than the retention cut-off were deleted on purpose: they stay deleted.
+  for (const l of snap.leads.filter((x) => want(x.id) && !leadExpired(x, now))) {
     const k = `leads/${l.id}.json`;
     if (!opts.overwrite && existing.has(k)) continue;
     await writeJson(k, l);

@@ -3,10 +3,10 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type { ToolOutcome } from "./assistant-stream";
 import { z } from "zod";
 import type { Locale } from "./i18n";
-import { checkDay, formatDate, todayInPhoenix, windowLabel } from "./schedule";
+import { formatDate, todayInPhoenix, windowLabel } from "./schedule";
 import { services, site, windows } from "./site";
 import { createPublicLead } from "./booking";
-import { listLeads } from "./store";
+import { openWindows } from "./slots";
 import { dateSchema, phoneSchema, windowSchema } from "./validation";
 
 export { assistantModel, DEFAULT_MODEL } from "./assistant-stream";
@@ -151,7 +151,7 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext): P
     if (name === "check_availability") {
       const parsed = checkInput.safeParse(input);
       if (!parsed.success) return invalid(parsed.error);
-      const day = checkDay(parsed.data.date, await listLeads());
+      const day = await openWindows(parsed.data.date);
       if (!day.ok) return { content: day.reason };
       if (day.open.length === 0)
         return { content: `${formatDate(parsed.data.date)} is fully booked. Suggest another day.` };
@@ -164,7 +164,7 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext): P
       const parsed = bookInput.safeParse(input);
       if (!parsed.success) return invalid(parsed.error);
       const d = parsed.data;
-      const day = checkDay(d.date, await listLeads());
+      const day = await openWindows(d.date);
       if (!day.ok) return { content: day.reason, isError: true };
       if (!day.open.includes(d.window)) {
         return {

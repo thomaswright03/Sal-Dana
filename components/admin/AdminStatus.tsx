@@ -83,27 +83,30 @@ export function AdminStatus() {
             <span data-testid="overall" className={`rounded-full px-4 py-1.5 text-sm font-medium ${BADGE[report.overall]}`}>
               {WORD[report.overall]}
             </span>
-            <p className="text-sm text-sand">Last checked {arizona(report.checkedAt)} (Arizona time)</p>
+            <p className="text-sm text-sand">Last checked {arizona(report.checked_at)} (Arizona time)</p>
           </section>
 
-          {report.groups.map((g) => (
-            <section key={g.tier} className="mt-8">
-              <h2 className="eyebrow mb-3">{TIER_LABEL[g.tier]}</h2>
+          {(["important", "key", "basic"] as const).map((tier) => (
+            <section key={tier} className="mt-8">
+              <h2 className="eyebrow mb-3">{TIER_LABEL[tier]}</h2>
               <ul className="divide-y divide-line/70 rounded-2xl border border-line bg-coal">
-                {g.items.map((it) => (
-                  <li key={it.id} className="grid gap-2 p-4 sm:grid-cols-[1fr_auto]">
-                    <div>
-                      <p className="text-sm font-medium text-bone">{it.label}</p>
-                      <p className="mt-1 text-xs leading-relaxed text-dust">{it.detail}</p>
-                      <p className="mt-1 text-xs text-dust">
-                        Checked {arizona(it.lastChecked)} · Last success {arizona(it.lastSuccess)}
-                      </p>
-                    </div>
-                    <span className={`h-fit w-fit rounded-full px-3 py-1 text-xs font-medium ${BADGE[it.status]}`}>
-                      {WORD[it.status]}
-                    </span>
-                  </li>
-                ))}
+                {report.functions
+                  .filter((f) => f.tier === tier)
+                  .map((it) => (
+                    <li key={it.name} className="grid gap-2 p-4 sm:grid-cols-[1fr_auto]">
+                      <div>
+                        <p className="text-sm font-medium text-bone">{it.name}</p>
+                        {it.detail && <p className="mt-1 text-xs leading-relaxed text-dust">{it.detail}</p>}
+                        <p className="mt-1 text-xs text-dust">
+                          Checked {arizona(it.last_checked)} · Last success {arizona(it.last_success)}
+                          {it.next_expected_run && ` · Next run ${arizona(it.next_expected_run)}`}
+                        </p>
+                      </div>
+                      <span className={`h-fit w-fit rounded-full px-3 py-1 text-xs font-medium ${BADGE[it.status]}`}>
+                        {WORD[it.status]}
+                      </span>
+                    </li>
+                  ))}
               </ul>
             </section>
           ))}

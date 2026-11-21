@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
-import { checkDay } from "@/lib/schedule";
+import { openWindows } from "@/lib/slots";
 import { createPublicLead } from "@/lib/booking";
-import { listLeads, StorageNotConfiguredError } from "@/lib/store";
+import { StorageNotConfiguredError } from "@/lib/store";
 import { publicLeadSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     let appointment = null;
     let note: string | undefined;
     if (data.date && data.window) {
-      const day = checkDay(data.date, await listLeads());
+      const day = await openWindows(data.date);
       if (day.ok && day.open.includes(data.window)) {
         appointment = { date: data.date, window: data.window, status: "requested" as const };
       } else {

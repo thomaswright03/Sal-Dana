@@ -1,7 +1,9 @@
 import "server-only";
 import { alertRecipient, leadRecipient, sendEmail, siteUrl } from "./email";
 import { formatDate, windowLabel } from "./schedule";
+import { listKeys, removeJson, writeJson } from "./kv";
 import { recordOps } from "./ops";
+import { getLead } from "./store";
 import type { Lead } from "./types";
 
 export function leadEmailText(lead: Lead): string {
@@ -20,12 +22,15 @@ export function leadEmailText(lead: Lead): string {
   ].join("\n");
 }
 
-/**
- * Emails Alan about a new real lead. Called after the lead is saved. Never throws, so a
- * failed send can't lose the lead; the outcome is logged and shown on /admin.
- */
-export async function notifyNewLead(lead: Lead): Promise<boolean> {
-  if (lead.demo) return true;
+/** One marker per lead whose email hasn't gone out yet. */
+const PENDING = "pending-email/";
+const pendingKey = (id: string) => `${PENDING}${id}.json`;
+
+export async function pendingNotificationCount(): Promise<number> {
+  return (await listKeys(PENDING)).length;
+}
+
+async function sendLeadEmail(lead: Lead): Promise<boolean> {
   const sent = await sendEmail({
     to: leadRecipient(),
     subject: `New lead: ${lead.name}${lead.service ? ` (${lead.service})` : ""}`,
@@ -33,11 +38,43 @@ export async function notifyNewLead(lead: Lead): Promise<boolean> {
   });
   if (sent.ok) {
     await recordOps("leadNotify", true, "Last new-lead email sent");
+    await removeJson(pendingKey(lead.id)).catch(() => undefined);
     return true;
   }
   console.error("lead notification failed", sent.error);
   await recordOps("leadNotify", false, sent.error);
+  // Remember it, so a later run can send it again.
+  await writeJson(pendingKey(lead.id), { leadId: lead.id, failedAt: new Date().toISOString() }).catch(() => undefined);
   return false;
+}
+
+/**
+ * Emails Alan about a new real lead. Called after the lead is saved. Never throws, so a
+ * failed send can't lose the lead; the outcome is logged and shown on /admin, and the lead
+ * is queued to be sent again (daily cron, or the next successful send).
+ */
+export async function notifyNewLead(lead: Lead): Promise<boolean> {
+  if (lead.demo) return true;
+  const ok = await sendLeadEmail(lead);
+  if (ok) await retryPendingNotifications().catch(() => undefined);
+  return ok;
+}
+
+/** Sends again every lead email that failed before. Returns how many went out and how many are still waiting. */
+export async function retryPendingNotifications(): Promise<{ sent: number; waiting: number }> {
+  let sent = 0;
+  let waiting = 0;
+  for (const k of await listKeys(PENDING)) {
+    const id = k.slice(PENDING.length, -".json".length);
+    const lead = await getLead(id).catch(() => null);
+    if (!lead) {
+      await removeJson(k).catch(() => undefined); // deleted since
+      continue;
+    }
+    if (await sendLeadEmail(lead)) sent++;
+    else waiting++;
+  }
+  return { sent, waiting };
 }
 
 /** Emails the named person when a background job fails. */

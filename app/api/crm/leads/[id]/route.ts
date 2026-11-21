@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireOwner, storageError } from "@/lib/crm-guard";
-import { ConflictError, deleteLead, updateLead } from "@/lib/store";
+import { claimForOwner, SlotTakenError } from "@/lib/slots";
+import { ConflictError, deleteLead, getLead, updateLead } from "@/lib/store";
 import { crmPatchSchema } from "@/lib/validation";
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -12,12 +13,22 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid update" }, { status: 400 });
   }
   try {
-    const lead = await updateLead(id, parsed.data);
+    const { confirmDoubleBook, ...patch } = parsed.data;
+    const appt = patch.appointment;
+    if (appt) {
+      const before = (await getLead(id))?.appointment;
+      const moved = !before || before.date !== appt.date || before.window !== appt.window || before.status === "cancelled";
+      if (moved) await claimForOwner(appt, id, confirmDoubleBook);
+    }
+    const lead = await updateLead(id, patch);
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     return NextResponse.json({ lead });
   } catch (err) {
     if (err instanceof ConflictError) {
       return NextResponse.json({ error: err.message, code: "conflict" }, { status: 409 });
+    }
+    if (err instanceof SlotTakenError) {
+      return NextResponse.json({ error: err.message, code: "slot-taken" }, { status: 409 });
     }
     return storageError(err);
   }

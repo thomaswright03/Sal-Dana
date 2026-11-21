@@ -117,6 +117,22 @@ export async function readJsonFrom<T>(token: string, key: string): Promise<T | n
   return JSON.parse(await new Response(res.stream).text()) as T;
 }
 
+export async function removeJsonFrom(token: string, key: string): Promise<void> {
+  check(key);
+  await del(key, { token });
+}
+
+export async function listKeysFrom(token: string, prefix: string): Promise<string[]> {
+  const keys: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await list({ prefix, cursor, limit: 1000, token });
+    keys.push(...page.blobs.map((b) => b.pathname));
+    cursor = page.hasMore ? page.cursor : undefined;
+  } while (cursor);
+  return keys;
+}
+
 export async function removeJson(key: string): Promise<void> {
   check(key);
   if (backend() === "blob") {
@@ -138,8 +154,12 @@ export async function listKeys(prefix: string): Promise<string[]> {
     } while (cursor);
     return keys;
   }
-  const files = await fs.readdir(path.join(DATA_DIR, prefix)).catch(() => [] as string[]);
-  return files.filter((f) => f.endsWith(".json")).map((f) => `${prefix}${f}`);
+  // The prefix may end mid-name ("slots/2026-11-25_"), like a Blob prefix.
+  const cut = prefix.lastIndexOf("/") + 1;
+  const dir = prefix.slice(0, cut);
+  const namePrefix = prefix.slice(cut);
+  const files = await fs.readdir(path.join(DATA_DIR, dir)).catch(() => [] as string[]);
+  return files.filter((f) => f.endsWith(".json") && f.startsWith(namePrefix)).map((f) => `${dir}${f}`);
 }
 
 /** Reads many documents, a few at a time, skipping any that fail to load. */

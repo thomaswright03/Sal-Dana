@@ -24,30 +24,38 @@ export interface OpsEntry {
 
 export type OpsState = Partial<Record<OpsKey, OpsEntry>>;
 
-const KEY = "ops/state.json";
+const KEYS: OpsKey[] = ["retention", "backup", "leadSave", "leadNotify", "anthropic", "restore"];
+/** One document per key, so two jobs recording at once can't overwrite each other. */
+const docKey = (k: OpsKey) => `ops/${k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}.json`;
 
 export async function getOps(): Promise<OpsState> {
-  try {
-    return (await readJson<OpsState>(KEY)) ?? {};
-  } catch {
-    return {};
-  }
+  const state: OpsState = {};
+  await Promise.all(
+    KEYS.map(async (k) => {
+      try {
+        const e = await readJson<OpsEntry>(docKey(k));
+        if (e) state[k] = e;
+      } catch {
+        /* unreadable: treated as never run */
+      }
+    }),
+  );
+  return state;
 }
 
 /** Records the outcome of one run. Best effort: storage trouble is logged, not thrown. */
 export async function recordOps(key: OpsKey, ok: boolean, detail: string): Promise<void> {
   try {
-    const state = await getOps();
+    const prev = await readJson<OpsEntry>(docKey(key));
     const now = new Date().toISOString();
-    const prev = state[key];
-    state[key] = {
+    const entry: OpsEntry = {
       lastRun: now,
       lastOk: ok ? now : (prev?.lastOk ?? null),
       lastError: ok ? (prev?.lastError ?? null) : detail,
       lastErrorAt: ok ? (prev?.lastErrorAt ?? null) : now,
       detail,
     };
-    await writeJson(KEY, state);
+    await writeJson(docKey(key), entry);
   } catch (err) {
     console.error(`ops record failed for ${key}`, err);
   }

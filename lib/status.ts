@@ -8,9 +8,21 @@ import { getOps, type OpsEntry, type OpsKey } from "./ops";
 import { getSettings } from "./settings";
 import { getTraffic } from "./traffic";
 
-import type { Status, StatusItem, StatusReport } from "./status-types";
+import { pendingNotificationCount } from "./notify";
+import { KEEP_SNAPSHOTS, secondStoreConfigured } from "./backup";
+import type { Status, StatusReport, Tier } from "./status-types";
 
-export type { Status, StatusItem, StatusReport };
+export type { Status, StatusReport };
+
+interface StatusItem {
+  id: string;
+  label: string;
+  status: Status;
+  lastChecked: string | null;
+  lastSuccess: string | null;
+  nextExpectedRun?: string | null;
+  detail: string;
+}
 
 const DAY = 86_400_000;
 const rank: Record<Status, number> = { ok: 0, unknown: 1, warning: 2, down: 3 };
@@ -35,9 +47,9 @@ function fromOps(
   opts: { staleAfterMs?: number; neverDetail: string; schedule?: string },
   now: Date,
 ): StatusItem {
-  const next = opts.schedule ? ` Next run ${nextCronRun(opts.schedule, now).toISOString()}.` : "";
+  const next = opts.schedule ? nextCronRun(opts.schedule, now).toISOString() : null;
   if (!e || !e.lastRun) {
-    return { id, label, status: "unknown", lastChecked: now.toISOString(), lastSuccess: null, detail: opts.neverDetail + next };
+    return { id, label, status: "unknown", lastChecked: now.toISOString(), lastSuccess: null, nextExpectedRun: next, detail: opts.neverDetail };
   }
   const failedLast = e.lastErrorAt !== null && e.lastErrorAt === e.lastRun;
   let status: Status = failedLast ? "down" : "ok";
@@ -46,13 +58,14 @@ function fromOps(
     status = "warning";
     detail = `Hasn't run since ${e.lastRun}.`;
   }
-  return { id, label, status, lastChecked: now.toISOString(), lastSuccess: e.lastOk, detail: detail + next };
+  return { id, label, status, lastChecked: now.toISOString(), lastSuccess: e.lastOk, nextExpectedRun: next, detail };
 }
 
 /** Real checks; none of them write anything. */
 export async function getStatus(now = new Date()): Promise<StatusReport> {
   const iso = now.toISOString();
   const item = (id: string, label: string, status: Status, detail: string, lastSuccess: string | null = null): StatusItem => ({
+    nextExpectedRun: null,
     id,
     label,
     status,
@@ -75,9 +88,9 @@ export async function getStatus(now = new Date()): Promise<StatusReport> {
   }
   const storageUp = storage.status === "ok";
 
-  const [ops, settings, backups, traffic] = storageUp
-    ? await Promise.all([getOps(), getSettings(), listBackups().catch(() => []), getTraffic(7).catch(() => [])])
-    : [{}, { aiEnabled: true } as { aiEnabled: boolean; changedAt?: string }, [] as string[], []];
+  const [ops, settings, backups, traffic, pending] = storageUp
+    ? await Promise.all([getOps(), getSettings(), listBackups().catch(() => []), getTraffic(7).catch(() => []), pendingNotificationCount().catch(() => 0)])
+    : [{}, { aiEnabled: true } as { aiEnabled: boolean; changedAt?: string }, [] as string[], [], 0];
 
   const hasKey = Boolean(process.env.ANTHROPIC_API_KEY);
 
@@ -116,11 +129,27 @@ export async function getStatus(now = new Date()): Promise<StatusReport> {
   if (!process.env.RESEND_API_KEY) {
     notifyItem.status = "down";
     notifyItem.detail = "RESEND_API_KEY is not set: Alan is not told about new leads.";
+  } else if (!process.env.EMAIL_FROM || !process.env.LEAD_NOTIFY_EMAIL) {
+    // Resend's shared sender only delivers to the Resend account owner.
+    if (notifyItem.status === "ok") notifyItem.status = "warning";
+    notifyItem.detail = `Emails only reach the Resend account owner, not Alan, until a sending domain is verified and EMAIL_FROM and LEAD_NOTIFY_EMAIL are set. ${notifyItem.detail}`.trim();
   }
+  const waiting = item(
+    "leads-waiting-email",
+    "Leads waiting for their email",
+    !storageUp ? "unknown" : pending === 0 ? "ok" : "warning",
+    pending === 0 ? "None." : `${pending} lead(s) saved but their email hasn't gone out yet. The daily job and the next successful send try again.`,
+  );
 
   // Basic
   const backupBase = fromOps("backup", "Latest backup", ops.backup, { staleAfterMs: 2 * DAY, neverDetail: "No backup has run yet.", schedule: SCHEDULES.backup }, now);
-  const backup = { ...backupBase, detail: `${backupBase.detail} ${backups.length} snapshot(s) kept.` };
+  const backup = { ...backupBase, detail: backupBase.status === "ok" ? "" : `${backupBase.detail} ${backups.length} snapshot(s) kept.`.trim() };
+  const secondStore = item(
+    "backup-second-store",
+    "Backup in a second store",
+    secondStoreConfigured() ? "ok" : "warning",
+    secondStoreConfigured() ? `Snapshots are also written to the second Blob store (newest ${KEEP_SNAPSHOTS} kept).` : "BACKUP_READ_WRITE_TOKEN is not set: backups are in the same store as the live data.",
+  );
   const crm = item(
     "crm-signin",
     "CRM sign-in",
@@ -132,19 +161,25 @@ export async function getStatus(now = new Date()): Promise<StatusReport> {
     : item("ai-switch", "AI kill switch", "ok", settings.aiEnabled ? "Assistant is allowed to run." : `Assistant is switched off (since ${settings.changedAt ?? "unknown"}).`);
   const deployedAt = process.env.BUILD_TIME || null;
   const commit = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null;
-  const version = item("version", "Deployed version", commit || deployedAt ? "ok" : "unknown", `${commit ?? "unknown commit"}${DEMO_MODE ? " (preview mode)" : ""}, deployed ${deployedAt ?? "unknown"}.`);
+  const version = item("version", `Deployed version${commit ? ` (${commit}${DEMO_MODE ? ", preview mode" : ""})` : ""}`, commit || deployedAt ? "ok" : "unknown", `${commit ?? "unknown commit"}${DEMO_MODE ? " (preview mode)" : ""}, deployed ${deployedAt ?? "unknown"}.`);
 
-  const groups: StatusReport["groups"] = [
-    { tier: "important", items: [form, assistant] },
-    { tier: "key", items: [anthropic, retention, tracking, notifyItem] },
-    { tier: "basic", items: [storage, crm, backup, kill, version] },
+  const tiers: [Tier, StatusItem[]][] = [
+    ["important", [form, assistant]],
+    ["key", [anthropic, retention, tracking, notifyItem, waiting]],
+    ["basic", [storage, crm, backup, secondStore, kill, version]],
   ];
-  const all = groups.flatMap((g) => g.items);
-  const important = groups[0].items;
-  // Down only when something Important or storage is down; other trouble shows as a warning.
-  const overall: Status =
-    worst(important.map((i) => i.status)) === "down" || storage.status === "down"
-      ? "down"
-      : worst(all.map((i) => (i.status === "unknown" ? "ok" : i.status === "down" ? "warning" : i.status)));
-  return { project: "Sal Dana Renovations", overall, checkedAt: iso, version: { commit, deployedAt }, groups };
+  const functions: StatusReport["functions"] = tiers.flatMap(([tier, items]) =>
+    items.map((i) => ({
+      tier,
+      name: i.label,
+      status: i.status,
+      last_checked: i.lastChecked,
+      last_success: i.lastSuccess,
+      next_expected_run: i.nextExpectedRun ?? null,
+      detail: i.status === "ok" ? "" : i.detail,
+    })),
+  );
+  // The worst status among the Important functions; unknown stays unknown.
+  const overall = worst(functions.filter((f) => f.tier === "important").map((f) => f.status));
+  return { product: "Sal Dana Renovations", checked_at: iso, overall, functions };
 }

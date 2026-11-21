@@ -55,6 +55,7 @@ export function Dashboard() {
   const [creating, setCreating] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
+  const [slotWarning, setSlotWarning] = useState<{ message: string; id: string | null; body: Record<string, unknown> } | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [menu, setMenu] = useState<"alerts" | "account" | null>(null);
   const [sampleBusy, setSampleBusy] = useState(false);
@@ -162,7 +163,12 @@ export function Dashboard() {
           setConflict(true);
           return;
         }
-        const data = (await res.json()) as { lead?: Lead; error?: string };
+        const data = (await res.json()) as { lead?: Lead; error?: string; code?: string };
+        if (res.status === 409 && data.code === "slot-taken") {
+          setLeads(before);
+          setSlotWarning({ message: data.error ?? "That window is already booked.", id, body });
+          return;
+        }
         if (!res.ok || !data.lead) throw new Error(data.error ?? "Couldn't save.");
         setLeads((ls) => ls.map((l) => (l.id === id ? data.lead! : l)));
       } catch (err) {
@@ -180,7 +186,11 @@ export function Dashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = (await res.json()) as { lead?: Lead; error?: string };
+      const data = (await res.json()) as { lead?: Lead; error?: string; code?: string };
+      if (res.status === 409 && data.code === "slot-taken") {
+        setSlotWarning({ message: data.error ?? "That window is already booked.", id: null, body });
+        return;
+      }
       if (!res.ok || !data.lead) {
         notify(data.error ?? "Couldn't create the lead.");
         return;
@@ -643,6 +653,30 @@ export function Dashboard() {
           onCreate={create}
           onDelete={remove}
         />
+
+        {slotWarning && (
+          <div
+            role="alert"
+            className="fixed bottom-20 left-1/2 z-[70] flex max-w-[92vw] -translate-x-1/2 flex-wrap items-center gap-3 rounded-2xl border border-brass/40 bg-coal px-5 py-3 text-sm shadow-2xl"
+          >
+            <span>{slotWarning.message}</span>
+            <button
+              type="button"
+              onClick={() => {
+                const w = slotWarning;
+                setSlotWarning(null);
+                if (w.id) void patchLead(w.id, { ...w.body, confirmDoubleBook: true });
+                else void create({ ...w.body, confirmDoubleBook: true });
+              }}
+              className="rounded-full bg-brass px-3.5 py-1.5 text-xs font-medium text-ink"
+            >
+              Book it anyway
+            </button>
+            <button type="button" onClick={() => setSlotWarning(null)} className="rounded-full border border-line px-3.5 py-1.5 text-xs text-sand">
+              Pick another time
+            </button>
+          </div>
+        )}
 
         {conflict && (
           <div

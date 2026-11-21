@@ -29,7 +29,7 @@ Almost everything a visitor reads lives in [`lib/site.ts`](lib/site.ts): phone, 
 | `LEAD_NOTIFY_EMAIL` | No | Where new-lead emails go. Defaults to the business email in `lib/site.ts`. |
 | `ALERT_EMAIL` | No | Who hears about failed cron jobs. Defaults to `LEAD_NOTIFY_EMAIL`. |
 | `EMAIL_FROM` | No | Sender, e.g. `Sal Dana <leads@yourdomain.com>`. Needs a domain verified in Resend; the default `onboarding@resend.dev` only delivers to the Resend account owner. |
-| `BACKUP_BLOB_READ_WRITE_TOKEN` | Recommended | Token of a second Blob store; each daily backup is also written there. |
+| `BACKUP_BLOB_READ_WRITE_TOKEN` (or `BACKUP_READ_WRITE_TOKEN`, what Vercel creates with prefix BACKUP) | Recommended | Token of a second Blob store (`sal-dana-backups`); each daily backup is also written there. The newest 30 snapshots are kept in each store; older ones are deleted, so leads removed by retention leave backups within 30 days, and a restore skips leads past the 24-month cut-off. |
 
 Copy `.env.example` to `.env.local` for local work. Never commit real values.
 
@@ -70,7 +70,7 @@ Browser ──> Next.js pages (/, /es, /crm, /admin)
    │                          ├─> lib/booking.ts: claim slot marker (slots/DATE_WINDOW.json, write-if-absent)
    │                          │      -> save lead (leads/ID.json) -> email Alan (Resend)
    ├─ /api/crm/* (owner cookie)└─> Vercel Blob store `sal-dana-crm` (private JSON; .data/ locally)
-   ├─ /admin, /admin/status.json (admin cookie or bearer token) -> real read-only checks + ops/state.json
+   ├─ /admin, /admin/status.json (admin cookie or bearer token) -> real read-only checks + ops/<key>.json (one document per job)
    └─ Vercel cron: /api/cron/retention (weekly), /api/cron/backup (daily) -> record result, email on failure
 ```
 
@@ -81,7 +81,7 @@ Browser ──> Next.js pages (/, /es, /crm, /admin)
 ## Status page, kill switch and alerts
 
 - `/admin` (sign in with `ADMIN_PASSWORD`) shows Important / Key / Basic checks with OK, Warning, Down or Unknown.
-  `/admin/status.json` returns the same as JSON (`overall`, `checkedAt`, `groups[].items[]`).
+  `/admin/status.json` returns the same as JSON (`product`, `checked_at`, `overall` = worst Important function, `functions[]` with `tier`, `name`, `status`, `last_checked`, `last_success`, `next_expected_run`, `detail`).
 - Settings > **Assistant on/off** in `/crm` stops the website chat and Ask AI on the next request (stored in Blob,
   no redeploy). The chat then shows the call-or-text message.
 - A failed new-lead email is logged and shown on `/admin`; the lead is never lost. A failed cron run emails `ALERT_EMAIL`.
@@ -106,3 +106,9 @@ conversations against the real API (skipped without a key).
 Deploys are Vercel: pushing `main` builds and ships. Set the env vars above in the Vercel project first. To roll
 back, open the Vercel project > Deployments, pick the last good one and choose **Promote to Production** (or
 `vercel rollback`). Data is not part of a deploy; restore data from a backup as above.
+
+## Concurrency notes
+- Visit slots: `slots/<date>_<window>_g<n>.json`, created write-if-absent and never overwritten; taking over a cancelled slot writes generation n+1, so only one claimer wins. Availability reads these markers, not every lead.
+- Owner visits set in the CRM claim the same marker; a taken window returns 409 `slot-taken` and the drawer offers "Book it anyway".
+- Failed new-lead emails leave `pending-email/<id>.json`; the daily backup cron and the next successful send retry them. /admin shows how many are waiting.
+- Known limits: reviews are one document (two simultaneous edits can drop one); the lead edit check (`updatedAt`) isn't a conditional write. Fine for a single owner.

@@ -8,39 +8,64 @@ afterEach(() => {
   delete process.env.CRM_PASSWORD;
 });
 
+const by = (s: Awaited<ReturnType<typeof getStatus>>, name: string) => s.functions.find((f) => f.name === name)!;
+
 describe("status", () => {
   it("is down, with storage and the booking form down, when the Blob token is missing", async () => {
     process.env.VERCEL = "1"; // on Vercel with no BLOB_READ_WRITE_TOKEN
     const s = await getStatus();
-    const items = Object.fromEntries(s.groups.flatMap((g) => g.items).map((i) => [i.id, i]));
-    expect(items.storage.status).toBe("down");
-    expect(items["booking-form"].status).toBe("down");
+    expect(by(s, "Blob storage").status).toBe("down");
+    expect(by(s, "Booking form saves a lead").status).toBe("down");
     expect(s.overall).toBe("down");
   });
 
-  it("groups rows as Important, Key and Basic with times and details", async () => {
+  it("returns exactly the status contract shape", async () => {
     const s = await getStatus();
-    expect(s.groups.map((g) => g.tier)).toEqual(["important", "key", "basic"]);
-    for (const i of s.groups.flatMap((g) => g.items)) {
-      expect(["ok", "warning", "down", "unknown"]).toContain(i.status);
-      expect(i.detail.length).toBeGreaterThan(0);
-      expect(i.lastChecked).toBeTruthy();
+    expect(Object.keys(s).sort()).toEqual(["checked_at", "functions", "overall", "product"]);
+    expect(new Set(s.functions.map((f) => f.tier))).toEqual(new Set(["important", "key", "basic"]));
+    for (const f of s.functions) {
+      expect(Object.keys(f).sort()).toEqual(["detail", "last_checked", "last_success", "name", "next_expected_run", "status", "tier"]);
+      expect(["ok", "warning", "down", "unknown"]).toContain(f.status);
+      if (f.status === "ok") expect(f.detail).toBe("");
+      else expect(f.detail.length).toBeGreaterThan(0);
     }
+  });
+
+  it("a never-run backup is not ok and says when it is next due", async () => {
+    const s = await getStatus(new Date("2026-11-21T12:00:00Z"));
+    const b = by(s, "Latest backup");
+    expect(b.status).not.toBe("ok");
+    expect(b.next_expected_run).toBe("2026-11-22T11:00:00.000Z");
+    expect(by(s, "Retention cron").next_expected_run).toBe("2026-11-23T10:00:00.000Z");
+  });
+
+  it("overall is the worst Important status and keeps unknown as unknown", async () => {
+    const s = await getStatus();
+    const worstImportant = s.functions.filter((f) => f.tier === "important").map((f) => f.status);
+    expect(worstImportant.includes(s.overall)).toBe(true);
+  });
+
+  it("says plainly that emails only reach the Resend owner until a domain is set", async () => {
+    process.env.RESEND_API_KEY = "re_test";
+    const s = await getStatus();
+    delete process.env.RESEND_API_KEY;
+    expect(by(s, "New-lead email").detail).toContain("Resend account owner");
+    expect(by(s, "New-lead email").status).not.toBe("ok");
   });
 
   it("shows a failed last cron run as down and a good one as ok", async () => {
     await recordOps("retention", false, "boom");
     let s = await getStatus();
-    expect(s.groups[1].items.find((i) => i.id === "retention")?.status).toBe("down");
+    expect(by(s, "Retention cron").status).toBe("down");
     await recordOps("retention", true, "{}");
     s = await getStatus();
-    expect(s.groups[1].items.find((i) => i.id === "retention")?.status).toBe("ok");
+    expect(by(s, "Retention cron").status).toBe("ok");
   });
 
   it("works with the booking form after a lead is saved", async () => {
     await createPublicLead({ name: "Sam", phone: "4805550100", source: "website-form" }, null);
     const s = await getStatus();
-    expect(s.groups[0].items[0].status).toBe("ok");
+    expect(by(s, "Booking form saves a lead").status).toBe("ok");
   });
 
   it("computes the next cron run", () => {
