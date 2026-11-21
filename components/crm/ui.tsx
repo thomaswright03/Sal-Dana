@@ -181,7 +181,7 @@ export function ChartCard({
 }
 
 /** Signed change against the prior period, with an arrow so it never relies on color. */
-export function Delta({
+function Delta({
   value,
   label,
   goodWhenUp = true,

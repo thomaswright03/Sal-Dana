@@ -245,21 +245,24 @@ export function SettingsView() {
 
         <Card className="p-5 sm:p-6" index={4}>
           <h2 className="text-[0.9375rem] font-medium text-bone">Latest update</h2>
-          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Reliability round.</p>
-          <h3 className="mt-4 text-xs font-medium text-bone">Frontend changes (website)</h3>
+          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Round 3: booking, accessibility and safety.</p>
+          <h3 className="mt-4 text-xs font-medium text-bone">Frontend changes</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
-            <li>Branded “page not found” and error pages in English and Spanish, with Home, Call and Text (and Try again on errors). Same for the dashboard.</li>
-            <li>Home-screen icon for phones.</li>
-            <li>If someone books a time that was just taken, they are told it’s unavailable and Alan still gets their request.</li>
+            <li>Website, Book a visit form: after picking a day, times that are already taken show as “Taken” and can’t be chosen. Closed, past and too-far days say why, in English and Spanish.</li>
+            <li>Website, Book a visit form: if the time is taken just as someone submits, the confirmation says so plainly and that Alan will offer another time.</li>
+            <li>Website, Book a visit form: a wrong phone, name or email is flagged under that field, in English and Spanish.</li>
+            <li>Website: the page no longer glitches on load for visitors who prefer reduced motion.</li>
+            <li>Website: the “Ask &amp; book” button now appears after the top banner scrolls away, so it no longer covers the banner’s bottom row.</li>
+            <li>Leads, lead drawer: deleting a note now asks “Delete for good?” first.</li>
+            <li>Schedule and lead drawer (round 2): a taken visit slot warns and offers “Book it anyway”.</li>
           </ul>
-          <h3 className="mt-4 text-xs font-medium text-bone">Other changes (dashboard and behind the scenes)</h3>
+          <h3 className="mt-4 text-xs font-medium text-bone">Other changes</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
-            <li>Alan gets an email for every new lead, with name, phone, service, requested time and a link to the lead.</li>
-            <li>Assistant on/off switch in Settings; it stops the chat and Ask AI right away.</li>
-            <li>Two people can no longer book the same time slot; two tabs editing one lead now warn instead of overwriting.</li>
-            <li>Daily backup of leads and reviews, with a restore; failed background jobs email an alert.</li>
-            <li>Private status page at /admin for the site’s health. Deleting a review now confirms inline.</li>
-            <li>Assistant uses a cheaper model, shorter replies and prompt caching.</li>
+            <li>New public check of open visit times for a day, using the same rules as booking.</li>
+            <li>Restoring a backup now also re-holds the visit slots of restored leads.</li>
+            <li>Two saves of one lead at the same moment: exactly one goes through, the other is asked to reload.</li>
+            <li>Round 2: failed lead emails are queued and retried (count on /admin); backups keep 30 days and are copied to a second store; the status page format was reworked; availability reads slot markers; restore skips expired leads.</li>
+            <li>Round 1: lead emails, assistant on/off switch, daily backups, private /admin status page, branded error pages.</li>
           </ul>
         </Card>
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { useReduced } from "./useReduced";
+import { motion, useMotionValue, useSpring } from "motion/react";
 import type { PointerEvent, ReactNode } from "react";
 
 /** Pulls its child toward the pointer, like a magnet, and springs back on leave. */
@@ -13,7 +14,7 @@ export function Magnetic({
   strength?: number;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduced();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const sx = useSpring(x, { stiffness: 220, damping: 16, mass: 0.4 });

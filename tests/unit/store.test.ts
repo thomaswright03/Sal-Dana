@@ -51,3 +51,16 @@ describe("lead store", () => {
     expect(await listLeads()).toHaveLength(0);
   });
 });
+
+describe("atomic stale-edit check", () => {
+  it("lets exactly one of two parallel saves from the same version through", async () => {
+    const l = await createLead(base);
+    const results = await Promise.allSettled([
+      updateLead(l.id, { name: "A", expectedUpdatedAt: l.updatedAt }),
+      updateLead(l.id, { name: "B", expectedUpdatedAt: l.updatedAt }),
+    ]);
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    const failed = results.find((r) => r.status === "rejected") as PromiseRejectedResult;
+    expect(failed.reason).toBeInstanceOf(ConflictError);
+  });
+});

@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { useReduced } from "./useReduced";
+import { motion } from "motion/react";
 import type { PublicReview } from "@/lib/types";
 import { EASE } from "./Intro";
 import { FadeUp, RevealLines } from "./Reveal";
@@ -67,7 +68,7 @@ function Card({ review }: { review: PublicReview }) {
 
 /** One endless row of review cards. Pauses while hovered or focused. */
 function Row({ reviews, reverse = false }: { reviews: PublicReview[]; reverse?: boolean }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduced();
   if (reduce) {
     return (
       <div className="flex gap-5 overflow-x-auto px-[clamp(1.25rem,4vw,4rem)] pb-2">

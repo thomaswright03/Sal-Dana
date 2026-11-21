@@ -2,7 +2,7 @@ export type Status = "ok" | "warning" | "down" | "unknown";
 export type Tier = "important" | "key" | "basic";
 
 /** One checked function, in the shape the CAO reads from /admin/status.json. */
-export interface StatusFunction {
+interface StatusFunction {
   tier: Tier;
   name: string;
   status: Status;

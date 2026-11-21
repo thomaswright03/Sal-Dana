@@ -20,8 +20,6 @@ export const VIZ = {
   surface: "#131210",
 } as const;
 
-export const SERIES = [VIZ.gold, VIZ.blue, VIZ.aqua, VIZ.violet, VIZ.magenta] as const;
-
 function useWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   const [width, setWidth] = useState(0);

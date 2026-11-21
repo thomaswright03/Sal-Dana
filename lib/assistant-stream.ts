@@ -3,7 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { recordOps } from "./ops";
 
 /** Mid-priced model for chat: books reliably at a fraction of the frontier model's cost. Override with ANTHROPIC_MODEL; `npm run eval` checks any model. */
-export const DEFAULT_MODEL = "claude-sonnet-5-5";
+const DEFAULT_MODEL = "claude-sonnet-5-5";
 
 /** Models that accept the server-side refusal fallback parameter. */
 const FALLBACK_MODELS = new Set([

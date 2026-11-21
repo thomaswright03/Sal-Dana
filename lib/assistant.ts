@@ -9,7 +9,7 @@ import { createPublicLead } from "./booking";
 import { openWindows } from "./slots";
 import { dateSchema, phoneSchema, windowSchema } from "./validation";
 
-export { assistantModel, DEFAULT_MODEL } from "./assistant-stream";
+export { assistantModel } from "./assistant-stream";
 
 export function systemPrompt(locale: Locale = "en"): string {
   const today = todayInPhoenix();

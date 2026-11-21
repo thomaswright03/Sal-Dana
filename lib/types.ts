@@ -118,17 +118,15 @@ export const TRAFFIC_EVENT_LABELS: Record<TrafficEvent, string> = {
   form_submit: "Sent the form",
 };
 
-export const TRAFFIC_SOURCES = [
-  "Google",
-  "Direct",
-  "Facebook",
-  "Instagram",
-  "Nextdoor",
-  "Yelp",
-  "Other search",
-  "Other sites",
-] as const;
-export type TrafficSource = (typeof TRAFFIC_SOURCES)[number];
+export type TrafficSource =
+  | "Google"
+  | "Direct"
+  | "Facebook"
+  | "Instagram"
+  | "Nextdoor"
+  | "Yelp"
+  | "Other search"
+  | "Other sites";
 
 /** One day of anonymous, aggregate site activity. No visitor is identifiable from it. */
 export interface TrafficDay {

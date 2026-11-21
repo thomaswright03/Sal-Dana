@@ -27,7 +27,7 @@ export function addDays(date: string, n: number): string {
 }
 
 /** The `n` days ending on `end`, oldest first. */
-export function daysEnding(end: string, n: number): string[] {
+function daysEnding(end: string, n: number): string[] {
   return Array.from({ length: n }, (_, i) => addDays(end, i - n + 1));
 }
 
@@ -51,7 +51,7 @@ export function change(current: number, previous: number): number | null {
   return ((current - previous) / previous) * 100;
 }
 
-export const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
+const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
 
 /** Leads that arrived on each of the given days. */
 export function leadsPerDay(leads: Lead[], days: string[]): number[] {

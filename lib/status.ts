@@ -12,7 +12,7 @@ import { pendingNotificationCount } from "./notify";
 import { KEEP_SNAPSHOTS, secondStoreConfigured } from "./backup";
 import type { Status, StatusReport, Tier } from "./status-types";
 
-export type { Status, StatusReport };
+export type { StatusReport };
 
 interface StatusItem {
   id: string;
@@ -26,7 +26,7 @@ interface StatusItem {
 
 const DAY = 86_400_000;
 const rank: Record<Status, number> = { ok: 0, unknown: 1, warning: 2, down: 3 };
-export const worst = (list: Status[]): Status => list.reduce<Status>((a, b) => (rank[b] > rank[a] ? b : a), "ok");
+const worst = (list: Status[]): Status => list.reduce<Status>((a, b) => (rank[b] > rank[a] ? b : a), "ok");
 
 /** Next run of a cron given as "minute hour * * weekday|*" (UTC), matching vercel.json. */
 export function nextCronRun(schedule: string, from = new Date()): Date {
@@ -38,7 +38,7 @@ export function nextCronRun(schedule: string, from = new Date()): Date {
   throw new Error(`Unsupported schedule ${schedule}`);
 }
 
-export const SCHEDULES = { retention: "0 10 * * 1", backup: "0 11 * * *" } as const;
+const SCHEDULES = { retention: "0 10 * * 1", backup: "0 11 * * *" } as const;
 
 function fromOps(
   id: OpsKey,

@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { useReduced } from "./useReduced";
+import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { FadeUp, RevealLines } from "./Reveal";
 import { ServiceArt } from "./ServiceArt";
@@ -11,7 +12,7 @@ import { headingLines, useCopy } from "./useCopy";
  * gallery of service cards. On small screens it is an ordinary vertical stack.
  */
 export function Services() {
-  const reduce = useReducedMotion();
+  const reduce = useReduced();
   const t = useCopy();
   const services = t.services.list;
   const section = useRef<HTMLElement>(null);

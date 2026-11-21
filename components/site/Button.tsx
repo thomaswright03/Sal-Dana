@@ -58,7 +58,7 @@ export function Button({
   );
 }
 
-export function Arrow({ className = "" }: { className?: string }) {
+function Arrow({ className = "" }: { className?: string }) {
   return (
     <span className={`relative block h-3 w-3 overflow-hidden ${className}`} aria-hidden>
       <svg

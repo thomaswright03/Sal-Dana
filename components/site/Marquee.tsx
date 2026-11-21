@@ -1,10 +1,10 @@
 "use client";
 
+import { useReduced } from "./useReduced";
 import {
   motion,
   useAnimationFrame,
   useMotionValue,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -19,7 +19,7 @@ const wrap = (min: number, max: number, v: number) => {
 
 /** An endless band of type that speeds up and reverses with the scroll. */
 export function Marquee({ items, baseVelocity = 2.2 }: { items: readonly string[]; baseVelocity?: number }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduced();
   const baseX = useMotionValue(0);
   const { scrollY } = useScroll();
   const velocity = useVelocity(scrollY);

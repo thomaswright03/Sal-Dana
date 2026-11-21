@@ -35,7 +35,7 @@ const monthYear = (date: string) =>
     timeZone: "UTC",
   }).format(new Date(`${date}T12:00:00Z`));
 
-export function Stars({ rating, className = "h-3.5 w-3.5" }: { rating: number; className?: string }) {
+function Stars({ rating, className = "h-3.5 w-3.5" }: { rating: number; className?: string }) {
   return (
     <span className="inline-flex gap-0.5" role="img" aria-label={`${rating} out of 5 stars`}>
       {[1, 2, 3, 4, 5].map((n) => (

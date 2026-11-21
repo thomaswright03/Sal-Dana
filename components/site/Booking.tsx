@@ -1,8 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useState, type FormEvent, type ReactNode } from "react";
-import { services, site, windows } from "@/lib/site";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { services, site, windows, type WindowId } from "@/lib/site";
+import { formatDate } from "@/lib/schedule";
 import { track } from "@/lib/track";
 import { Button } from "./Button";
 import { EASE } from "./Intro";
@@ -15,43 +16,74 @@ import { headingLines, useCopy, useLocale } from "./useCopy";
 type State =
   | { kind: "idle" }
   | { kind: "sending" }
-  | { kind: "done"; booked: boolean }
+  | { kind: "done"; booked: boolean; taken?: string }
   | { kind: "error"; message: string };
 
 function Field({
   label,
   children,
   className = "",
+  error,
+  errorId,
 }: {
   label: string;
   children: ReactNode;
   className?: string;
+  error?: string | null;
+  errorId?: string;
 }) {
   return (
-    <label className={`group relative block ${className}`}>
-      <span className="eyebrow mb-2 block transition-colors duration-300 group-focus-within:text-brass">
-        {label}
-      </span>
-      {children}
-      <span className="absolute bottom-0 left-0 h-px w-full bg-line" />
-      <span className="absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-brass transition-transform duration-700 ease-out-expo group-focus-within:scale-x-100" />
-    </label>
+    <div className={className}>
+      <label className="group relative block">
+        <span className="eyebrow mb-2 block transition-colors duration-300 group-focus-within:text-brass">
+          {label}
+        </span>
+        {children}
+        <span className="absolute bottom-0 left-0 h-px w-full bg-line" />
+        <span className="absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-brass transition-transform duration-700 ease-out-expo group-focus-within:scale-x-100" />
+      </label>
+      {error && (
+        <p id={errorId} role="alert" className="mt-2 text-sm text-red-300">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }
 
 const inputCls =
   "w-full bg-transparent pb-3 text-lg text-bone placeholder:text-dust/60 outline-none focus-visible:outline-none";
 
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+type Day =
+  | { kind: "none" }
+  | { kind: "loading" }
+  | { kind: "problem"; code: "invalid" | "past" | "far" | "closed" }
+  | { kind: "open"; open: string[] }
+  | { kind: "unknown" };
+
+function Chip({
+  active,
+  onClick,
+  children,
+  disabled = false,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
+      disabled={disabled}
       className={`rounded-full border px-4 py-2 text-[0.8125rem] transition-all duration-300 ${
-        active
-          ? "border-brass bg-brass text-ink"
-          : "border-line text-sand hover:border-bone/30 hover:text-bone"
+        disabled
+          ? "cursor-not-allowed border-line/60 text-dust/50 line-through"
+          : active
+            ? "border-brass bg-brass text-ink"
+            : "border-line text-sand hover:border-bone/30 hover:text-bone"
       }`}
     >
       {children}
@@ -66,25 +98,67 @@ export function Booking() {
   const [state, setState] = useState<State>({ kind: "idle" });
   const [service, setService] = useState("");
   const [win, setWin] = useState("");
+  const [date, setDate] = useState("");
+  const [day, setDay] = useState<Day>({ kind: "none" });
+  const [fieldErr, setFieldErr] = useState<{ field: string; message: string } | null>(null);
+
+  // Once a date is chosen, ask which windows are still free.
+  useEffect(() => {
+    if (!date) return;
+    const ctl = new AbortController();
+    fetch(`/api/availability?date=${encodeURIComponent(date)}`, { signal: ctl.signal })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("unavailable"))))
+      .then((d: { ok: boolean; open?: string[]; code?: "invalid" | "past" | "far" | "closed" }) => {
+        if (d.ok) {
+          const open = d.open ?? [];
+          setDay({ kind: "open", open });
+          setWin((w) => (w && !open.includes(w) ? "" : w));
+        } else {
+          setDay({ kind: "problem", code: d.code ?? "invalid" });
+          setWin("");
+        }
+      })
+      .catch((e: unknown) => {
+        if (!(e instanceof DOMException && e.name === "AbortError")) setDay({ kind: "unknown" });
+      });
+    return () => ctl.abort();
+  }, [date]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     setState({ kind: "sending" });
+    setFieldErr(null);
     try {
       const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...Object.fromEntries(form), service, window: win, language: locale }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string; booked?: boolean };
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        field?: string;
+        booked?: boolean;
+        slotTaken?: boolean;
+        takenDate?: string;
+        takenWindow?: WindowId;
+      };
       if (!res.ok) {
+        if (res.status === 400 && data.field && data.field in b.fieldError) {
+          setFieldErr({ field: data.field, message: b.fieldError[data.field as keyof typeof b.fieldError] });
+          setState({ kind: "idle" });
+          return;
+        }
         // The server answers in English; Spanish visitors get the matching message in Spanish.
         const local = res.status === 400 ? b.errorInvalid : res.status === 429 ? b.errorBusy : b.errorFailed;
         throw new Error(locale === "en" ? (data.error ?? local) : local);
       }
       track("form_submit");
-      setState({ kind: "done", booked: Boolean(data.booked) });
+      const taken =
+        data.slotTaken && data.takenDate && data.takenWindow
+          ? `${formatDate(data.takenDate, locale)} · ${WINDOW_TEXT[locale][data.takenWindow].label}`
+          : undefined;
+      setState({ kind: "done", booked: Boolean(data.booked), taken });
     } catch (err) {
       setState({
         kind: "error",
@@ -177,9 +251,11 @@ export function Booking() {
                     />
                   </svg>
                   <h3 className="font-serif text-5xl leading-none tracking-tight">
-                    {state.booked ? b.doneBooked : b.doneReceived}
+                    {state.taken ? b.doneTaken : state.booked ? b.doneBooked : b.doneReceived}
                   </h3>
-                  <p className="mt-5 max-w-sm text-[1.0625rem] leading-relaxed text-sand">{b.doneBody}</p>
+                  <p className="mt-5 max-w-sm text-[1.0625rem] leading-relaxed text-sand">
+                    {state.taken ? b.doneTakenBody(state.taken) : b.doneBody}
+                  </p>
                   <button
                     type="button"
                     onClick={() => setState({ kind: "idle" })}
@@ -198,9 +274,15 @@ export function Booking() {
                   transition={{ duration: 0.4 }}
                 >
                   <div className="grid gap-9 sm:grid-cols-2">
-                    <Field label={b.name}>
+                    <Field
+                      label={b.name}
+                      error={fieldErr?.field === "name" ? fieldErr.message : null}
+                      errorId="err-name"
+                    >
                       <input
                         name="name"
+                        aria-invalid={fieldErr?.field === "name"}
+                        aria-describedby="err-name"
                         required
                         minLength={2}
                         maxLength={120}
@@ -209,9 +291,15 @@ export function Booking() {
                         className={inputCls}
                       />
                     </Field>
-                    <Field label={b.phone}>
+                    <Field
+                      label={b.phone}
+                      error={fieldErr?.field === "phone" ? fieldErr.message : null}
+                      errorId="err-phone"
+                    >
                       <input
                         name="phone"
+                        aria-invalid={fieldErr?.field === "phone"}
+                        aria-describedby="err-phone"
                         required
                         type="tel"
                         maxLength={30}
@@ -220,9 +308,15 @@ export function Booking() {
                         className={inputCls}
                       />
                     </Field>
-                    <Field label={b.emailField}>
+                    <Field
+                      label={b.emailField}
+                      error={fieldErr?.field === "email" ? fieldErr.message : null}
+                      errorId="err-email"
+                    >
                       <input
                         name="email"
+                        aria-invalid={fieldErr?.field === "email"}
+                        aria-describedby="err-email"
                         type="email"
                         maxLength={200}
                         autoComplete="email"
@@ -276,6 +370,11 @@ export function Booking() {
                       <input
                         name="date"
                         type="date"
+                        value={date}
+                        onChange={(e) => {
+                          setDate(e.target.value);
+                          setDay({ kind: e.target.value ? "loading" : "none" });
+                        }}
                         // Earliest bookable day is tomorrow; set on focus so it reflects the visitor's clock.
                         onFocus={(e) => {
                           e.currentTarget.min = new Date(Date.now() + 86_400_000).toLocaleDateString("en-CA");
@@ -289,13 +388,24 @@ export function Booking() {
                         {windows.map((w) => (
                           <Chip
                             key={w.id}
+                            disabled={
+                              day.kind === "problem" || (day.kind === "open" && !day.open.includes(w.id))
+                            }
                             active={win === w.id}
                             onClick={() => setWin(win === w.id ? "" : w.id)}
                           >
                             {WINDOW_TEXT[locale][w.id].label}
+                            {day.kind === "open" && !day.open.includes(w.id) ? ` · ${b.taken}` : ""}
                           </Chip>
                         ))}
                       </div>
+                      <p className="mt-3 min-h-5 text-sm text-dust" role="status" aria-live="polite">
+                        {day.kind === "loading"
+                          ? b.checking
+                          : day.kind === "problem"
+                            ? b.dayProblem[day.code]
+                            : ""}
+                      </p>
                     </fieldset>
                   </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { useReduced } from "./useReduced";
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { EASE } from "./Intro";
 
@@ -27,7 +28,7 @@ export function RevealLines({
   show?: boolean;
   as?: "h1" | "h2" | "h3" | "p" | "div";
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduced();
   const Tag = motion[as];
   const controlled = show !== undefined;
   return (
@@ -71,7 +72,7 @@ export function FadeUp({
   y?: number;
   show?: boolean;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduced();
   const controlled = show !== undefined;
   return (
     <motion.div

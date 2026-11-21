@@ -11,7 +11,7 @@ export const phoneSchema = z
   .max(30)
   .refine((v) => v.replace(/\D/g, "").length >= 10, "Enter a phone number with area code");
 
-export const appointmentSchema = z.object({
+const appointmentSchema = z.object({
   date: dateSchema,
   window: windowSchema,
   status: z.enum(APPOINTMENT_STATUSES),

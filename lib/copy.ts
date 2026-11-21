@@ -93,6 +93,12 @@ export interface Copy {
     errorInvalid: string;
     errorBusy: string;
     errorFailed: string;
+    checking: string;
+    taken: string;
+    dayProblem: { invalid: string; past: string; far: string; closed: string };
+    fieldError: { name: string; phone: string; email: string; generic: string };
+    doneTaken: string;
+    doneTakenBody: (when: string) => string;
   };
   faq: { eyebrow: string; heading: Heading; items: { q: string; a: string }[] };
   footer: {
@@ -219,7 +225,8 @@ const en: Copy = {
     detailsPlaceholder: "A few words about what needs doing",
     submit: "Request a visit",
     sending: "Sending",
-    privacy: "We keep your details to get back to you about your project. Our AI assistant is run by Anthropic.",
+    privacy:
+      "We keep your details to get back to you about your project. Our AI assistant is run by Anthropic.",
     doneBooked: "Visit requested.",
     doneReceived: "Request received.",
     doneBody: `Thank you. ${site.owner} will be in touch shortly by call or text to confirm the details.`,
@@ -227,6 +234,23 @@ const en: Copy = {
     errorInvalid: "Please check the form and try again.",
     errorBusy: "Too many requests. Please call or text us instead.",
     errorFailed: "Something went wrong. Please call or text us instead.",
+    checking: "Checking open times…",
+    taken: "Taken",
+    dayProblem: {
+      invalid: "That isn’t a valid date.",
+      past: "Visits can be requested from tomorrow onward.",
+      far: "Visits can be requested up to 90 days ahead.",
+      closed: `We don’t book visits on that day. Hours: ${site.hoursDisplay}.`,
+    },
+    fieldError: {
+      name: "Please tell us your name.",
+      phone: "Enter a phone number with area code.",
+      email: "That email address doesn’t look right.",
+      generic: "Please check this field.",
+    },
+    doneTaken: "Request received, but that time was taken.",
+    doneTakenBody: (when) =>
+      `Someone else took ${when} just before you. ${site.owner} has your request and will offer you another time by call or text.`,
   },
   faq: {
     eyebrow: "Questions",
@@ -460,7 +484,8 @@ const es: Copy = {
     detailsPlaceholder: "Unas palabras sobre lo que hay que hacer",
     submit: "Solicitar una visita",
     sending: "Enviando",
-    privacy: "Guardamos tus datos para responderte sobre tu proyecto. Nuestro asistente de IA lo opera Anthropic.",
+    privacy:
+      "Guardamos tus datos para responderte sobre tu proyecto. Nuestro asistente de IA lo opera Anthropic.",
     doneBooked: "Visita solicitada.",
     doneReceived: "Solicitud recibida.",
     doneBody: `Gracias. ${site.owner} se pondrá en contacto contigo pronto, por llamada o mensaje, para confirmar los detalles.`,
@@ -468,6 +493,23 @@ const es: Copy = {
     errorInvalid: "Revisa el formulario e inténtalo de nuevo.",
     errorBusy: "Recibimos demasiadas solicitudes. Mejor llámanos o envíanos un mensaje.",
     errorFailed: "Algo salió mal. Mejor llámanos o envíanos un mensaje.",
+    checking: "Revisando horarios disponibles…",
+    taken: "Ocupado",
+    dayProblem: {
+      invalid: "Esa fecha no es válida.",
+      past: "Las visitas se pueden solicitar a partir de mañana.",
+      far: "Las visitas se pueden solicitar hasta con 90 días de anticipación.",
+      closed: "No agendamos visitas ese día. Consulta el horario más abajo.",
+    },
+    fieldError: {
+      name: "Por favor dinos tu nombre.",
+      phone: "Escribe un teléfono con código de área.",
+      email: "Ese correo no parece correcto.",
+      generic: "Revisa este campo.",
+    },
+    doneTaken: "Solicitud recibida, pero ese horario ya estaba ocupado.",
+    doneTakenBody: (when) =>
+      `Alguien más tomó ${when} justo antes que tú. ${site.owner} tiene tu solicitud y te ofrecerá otro horario por llamada o mensaje.`,
   },
   faq: {
     eyebrow: "Preguntas",

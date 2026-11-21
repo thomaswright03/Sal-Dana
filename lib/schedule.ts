@@ -29,17 +29,34 @@ export function formatDate(date: string, locale: Locale = "en"): string {
 
 export type DayCheck = { ok: true; open: WindowId[] } | { ok: false; reason: string };
 
-/** Why a date can't take a visit request, or null if it can. */
-export function dateProblem(date: string): string | null {
-  if (!isValidDate(date)) return "That isn't a valid date. Use YYYY-MM-DD.";
+export type DateProblemCode = "invalid" | "past" | "far" | "closed";
+
+/** Machine-readable reason a date can't take a visit request, or null if it can. */
+export function dateProblemCode(date: string): DateProblemCode | null {
+  if (!isValidDate(date)) return "invalid";
   const today = todayInPhoenix();
-  if (date <= today) return "Visits can be requested from tomorrow onward.";
+  if (date <= today) return "past";
   const max = new Date(`${today}T12:00:00Z`);
   max.setUTCDate(max.getUTCDate() + 90);
-  if (date > max.toISOString().slice(0, 10)) return "Visits can be requested up to 90 days ahead.";
-  if (!(site.workingDays as readonly number[]).includes(weekday(date)))
-    return `Alan works ${site.hoursDisplay}. Pick another day.`;
+  if (date > max.toISOString().slice(0, 10)) return "far";
+  if (!(site.workingDays as readonly number[]).includes(weekday(date))) return "closed";
   return null;
+}
+
+/** Why a date can't take a visit request, or null if it can. */
+export function dateProblem(date: string): string | null {
+  switch (dateProblemCode(date)) {
+    case "invalid":
+      return "That isn't a valid date. Use YYYY-MM-DD.";
+    case "past":
+      return "Visits can be requested from tomorrow onward.";
+    case "far":
+      return "Visits can be requested up to 90 days ahead.";
+    case "closed":
+      return `Alan works ${site.hoursDisplay}. Pick another day.`;
+    default:
+      return null;
+  }
 }
 
 /** Which visit windows are still open on a given day, from a list of leads (pure; used by tests). */

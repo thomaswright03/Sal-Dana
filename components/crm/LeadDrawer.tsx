@@ -105,6 +105,7 @@ function Panel({ lead, onClose, onPatch, onCreate, onDelete }: PanelProps) {
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmNote, setConfirmNote] = useState<string | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
 
   useEffect(() => {
@@ -376,22 +377,45 @@ function Panel({ lead, onClose, onPatch, onCreate, onDelete }: PanelProps) {
                         <p className="whitespace-pre-wrap text-sm leading-relaxed">{n.text}</p>
                         <p className="mt-1 text-[0.6875rem] text-dust">{ago(n.at)}</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => void onPatch(lead.id, { removeNoteId: n.id })}
-                        aria-label="Delete note"
-                        className="text-dust opacity-0 transition-opacity hover:text-red-200 group-hover:opacity-100 focus:opacity-100"
-                      >
-                        <svg
-                          viewBox="0 0 12 12"
-                          className="h-3 w-3"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.2"
+                      {confirmNote === n.id ? (
+                        <span className="flex shrink-0 items-center gap-2 text-xs">
+                          <span className="text-sand">Delete for good?</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setConfirmNote(null);
+                              void onPatch(lead.id, { removeNoteId: n.id });
+                            }}
+                            className="rounded-full bg-red-500/90 px-3 py-1 font-medium text-white"
+                          >
+                            Delete
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmNote(null)}
+                            className="rounded-full border border-line px-3 py-1 text-sand"
+                          >
+                            Keep
+                          </button>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmNote(n.id)}
+                          aria-label="Delete note"
+                          className="text-dust opacity-0 transition-opacity hover:text-red-200 group-hover:opacity-100 focus:opacity-100"
                         >
-                          <path d="M1 1l10 10M11 1 1 11" />
-                        </svg>
-                      </button>
+                          <svg
+                            viewBox="0 0 12 12"
+                            className="h-3 w-3"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.2"
+                          >
+                            <path d="M1 1l10 10M11 1 1 11" />
+                          </svg>
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>

@@ -6,7 +6,7 @@ import { recordOps } from "./ops";
 import { getLead } from "./store";
 import type { Lead } from "./types";
 
-export function leadEmailText(lead: Lead): string {
+function leadEmailText(lead: Lead): string {
   const slot = lead.appointment
     ? `${formatDate(lead.appointment.date)}, ${windowLabel(lead.appointment.window)} (requested)`
     : "No time requested";

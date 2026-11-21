@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { listKeys, readJson, readMany, removeJson, writeJson } from "./kv";
+import { listKeys, readJson, readMany, removeJson, writeJson, writeJsonIfAbsent } from "./kv";
 import type { Lead, Note } from "./types";
 
 export { StorageNotConfiguredError, storageReady } from "./kv";
@@ -77,6 +77,13 @@ export async function updateLead(
   const current = await getLead(id);
   if (!current) return null;
   if (patch.expectedUpdatedAt && patch.expectedUpdatedAt !== current.updatedAt) throw new ConflictError();
+  // Atomic stale-edit check: each (lead, version) can be edited from exactly once. The first writer
+  // creates the version marker (write-if-absent); a parallel save from the same version gets a conflict.
+  let versionKey: string | null = null;
+  if (patch.expectedUpdatedAt) {
+    versionKey = `lead-versions/${id}_${patch.expectedUpdatedAt.replace(/[^0-9]/g, "")}.json`;
+    if (!(await writeJsonIfAbsent(versionKey, { at: new Date().toISOString() }))) throw new ConflictError();
+  }
   const { addNote, removeNoteId, ...rest } = patch;
   const { expectedUpdatedAt, ...fields } = rest;
   void expectedUpdatedAt;
@@ -89,7 +96,13 @@ export async function updateLead(
   if (fields.status && fields.status !== current.status) {
     next.closedAt = fields.status === "won" || fields.status === "lost" ? now : null;
   }
-  await saveLead(next);
+  try {
+    await saveLead(next);
+  } catch (err) {
+    // The edit didn't land, so release the version for a retry.
+    if (versionKey) await removeJson(versionKey).catch(() => undefined);
+    throw err;
+  }
   return next;
 }
 

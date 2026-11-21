@@ -3,10 +3,10 @@ import { site } from "./site";
 
 /** Privacy policy and terms, in each language. Keep in step with DATA.md and LEGAL.md. */
 
-export const LEGAL_UPDATED = "2026-11-21";
+const LEGAL_UPDATED = "2026-11-21";
 export const RETENTION = { leadMonths: 24, transcriptMonths: 12 } as const;
 
-export interface Section {
+interface Section {
   h: string;
   p: string[];
 }

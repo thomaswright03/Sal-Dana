@@ -58,7 +58,7 @@ export async function claimSlot(date: string, window: WindowId, leadId: string):
 }
 
 /** The lead id currently holding a slot, or null if it is free. */
-export async function slotHolder(date: string, window: WindowId): Promise<string | null> {
+async function slotHolder(date: string, window: WindowId): Promise<string | null> {
   const cur = await current(date, window, await listKeys(`slots/${date}_`));
   return cur.marker && (await markerLive(date, window, cur.marker)) ? cur.marker.leadId : null;
 }

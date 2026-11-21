@@ -22,8 +22,24 @@ export function Chat() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [working, setWorking] = useState(false);
+  // The launcher waits until the hero's bottom row has scrolled clear, so it never sits on top of it.
+  const [pastHero, setPastHero] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const check = () => {
+      const hero = document.getElementById("top");
+      setPastHero(!hero || hero.getBoundingClientRect().bottom < window.innerHeight - 160);
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, []);
 
   // Keep the conversation for the length of the browser session.
   useEffect(() => {
@@ -144,7 +160,7 @@ export function Chat() {
   return (
     <>
       <AnimatePresence>
-        {ready && !open && (
+        {ready && pastHero && !open && (
           <motion.button
             type="button"
             onClick={() => {

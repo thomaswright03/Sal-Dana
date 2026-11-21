@@ -1,8 +1,19 @@
 import "server-only";
-import { listKeys, listKeysFrom, readJson, readJsonFrom, readMany, removeJson, removeJsonFrom, writeJson, writeJsonTo } from "./kv";
+import {
+  listKeys,
+  listKeysFrom,
+  readJson,
+  readJsonFrom,
+  readMany,
+  removeJson,
+  removeJsonFrom,
+  writeJson,
+  writeJsonTo,
+} from "./kv";
 import { recordOps } from "./ops";
 import { leadExpired } from "./retention";
 import { todayInPhoenix } from "./schedule";
+import { claimSlot } from "./slots";
 import type { Lead, Review } from "./types";
 
 /**
@@ -11,7 +22,7 @@ import type { Lead, Review } from "./types";
  * Restore: see README "Backup and restore".
  */
 
-export interface Snapshot {
+interface Snapshot {
   version: 1;
   takenAt: string;
   leads: Lead[];
@@ -21,10 +32,18 @@ export interface Snapshot {
 const backupKey = (date: string) => `backups/${date}.json`;
 /** Daily snapshots kept in each store. Older ones are deleted, so storage stays bounded and leads removed by retention drop out of backups within this time. */
 export const KEEP_SNAPSHOTS = 30;
-export const secondStoreConfigured = () => Boolean(process.env.BACKUP_BLOB_READ_WRITE_TOKEN || process.env.BACKUP_READ_WRITE_TOKEN);
-const secondToken = () => process.env.BACKUP_BLOB_READ_WRITE_TOKEN || process.env.BACKUP_READ_WRITE_TOKEN || null;
+export const secondStoreConfigured = () =>
+  Boolean(process.env.BACKUP_BLOB_READ_WRITE_TOKEN || process.env.BACKUP_READ_WRITE_TOKEN);
+const secondToken = () =>
+  process.env.BACKUP_BLOB_READ_WRITE_TOKEN || process.env.BACKUP_READ_WRITE_TOKEN || null;
 
-export async function runBackup(): Promise<{ date: string; leads: number; reviews: number; secondStore: boolean; pruned: number }> {
+export async function runBackup(): Promise<{
+  date: string;
+  leads: number;
+  reviews: number;
+  secondStore: boolean;
+  pruned: number;
+}> {
   const date = todayInPhoenix();
   const leads = await readMany<Lead>(await listKeys("leads/"));
   const reviews = (await readJson<Review[]>("reviews.json")) ?? [];
@@ -80,6 +99,10 @@ export async function restoreBackup(
     const k = `leads/${l.id}.json`;
     if (!opts.overwrite && existing.has(k)) continue;
     await writeJson(k, l);
+    // Booked visits hold their window again (write-if-absent), so a new booking can't take it.
+    if (l.appointment && l.appointment.status !== "cancelled") {
+      await claimSlot(l.appointment.date, l.appointment.window, l.id);
+    }
     leads++;
   }
   // Reviews are one document: add back any that are missing (or replace with `overwrite`).

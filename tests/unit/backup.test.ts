@@ -37,3 +37,25 @@ describe("backup and restore", () => {
     await expect(restoreBackup("../x")).rejects.toThrow();
   });
 });
+
+describe("restore and visit slots", () => {
+  it("a restored lead with a visit holds its window again", async () => {
+    const { createPublicLead } = await import("@/lib/booking");
+    const { claimSlot, openWindows } = await import("@/lib/slots");
+    const { listKeys, removeJson } = await import("@/lib/kv");
+    const { futureWorkingDay } = await import("./helpers");
+    const date = futureWorkingDay(5);
+    const res = await createPublicLead(
+      { ...base, name: "Visit" },
+      { date, window: "morning", status: "requested" },
+    );
+    if (!res.ok) throw new Error("expected booking");
+    const out = await runBackup();
+    await deleteLead(res.lead.id);
+    for (const k of await listKeys("slots/")) await removeJson(k);
+    expect((await openWindows(date)) as { open: string[] }).toMatchObject({ open: expect.arrayContaining(["morning"]) });
+
+    await restoreBackup(out.date);
+    expect(await claimSlot(date, "morning", "other-lead-id-1")).toBe(false);
+  });
+});

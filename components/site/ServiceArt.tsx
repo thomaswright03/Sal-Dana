@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { useReduced } from "./useReduced";
+import { motion } from "motion/react";
 import { EASE } from "./Intro";
 
 const rect = (x: number, y: number, w: number, h: number) => `M${x} ${y}h${w}v${h}h${-w}z`;
@@ -73,7 +74,7 @@ const drawings: Record<string, string[]> = {
 };
 
 export function ServiceArt({ id, className = "" }: { id: string; className?: string }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduced();
   return (
     <motion.svg
       viewBox="0 0 200 200"

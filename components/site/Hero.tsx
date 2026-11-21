@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useReduced } from "./useReduced";
+import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { site } from "@/lib/site";
 import { Button } from "./Button";
@@ -12,7 +13,7 @@ import { headingLines, useCopy } from "./useCopy";
 export function Hero() {
   const ready = useIntroDone();
   const t = useCopy();
-  const reduce = useReducedMotion();
+  const reduce = useReduced();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
 

@@ -15,8 +15,12 @@ export async function POST(req: Request) {
 
   const parsed = publicLeadSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
+    const issue = parsed.error.issues[0];
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Please check the form and try again." },
+      {
+        error: issue?.message ?? "Please check the form and try again.",
+        field: typeof issue?.path[0] === "string" ? issue.path[0] : undefined,
+      },
       { status: 400 },
     );
   }
@@ -58,7 +62,12 @@ export async function POST(req: Request) {
         : undefined,
     );
     if (!result.ok) throw new Error("unreachable");
-    return NextResponse.json({ ok: true, booked: result.booked });
+    const slotTaken = Boolean(data.date && data.window && !result.booked);
+    return NextResponse.json({
+      ok: true,
+      booked: result.booked,
+      ...(slotTaken ? { slotTaken: true, takenDate: data.date, takenWindow: data.window } : {}),
+    });
   } catch (err) {
     if (!(err instanceof StorageNotConfiguredError)) console.error("lead form failed", err);
     return NextResponse.json(
