@@ -90,7 +90,9 @@ export async function updateLead(
   let notes = current.notes;
   if (removeNoteId) notes = notes.filter((n) => n.id !== removeNoteId);
   if (addNote) notes = [makeNote(addNote), ...notes];
-  const now = new Date().toISOString();
+  // Always move updatedAt forward, even within the same millisecond, so a copy taken before this
+  // save can never match the new version (the stale-edit check compares these strings).
+  const now = new Date(Math.max(Date.now(), Date.parse(current.updatedAt) + 1)).toISOString();
   const next: Lead = { ...current, ...fields, notes, id: current.id, updatedAt: now };
   // Remember when a job was closed out so revenue lands in the right month.
   if (fields.status && fields.status !== current.status) {
