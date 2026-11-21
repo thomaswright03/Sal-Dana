@@ -182,25 +182,33 @@ export function Dashboard() {
 
   const create = useCallback(
     async (body: Record<string, unknown>) => {
-      const res = await fetch("/api/crm/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = (await res.json()) as { lead?: Lead; error?: string; code?: string };
-      if (res.status === 409 && data.code === "slot-taken") {
-        setSlotWarning({ message: data.error ?? "That window is already booked.", id: null, body });
-        return;
+      try {
+        const res = await fetch("/api/crm/leads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (res.status === 401) {
+          router.push("/crm/login");
+          return;
+        }
+        const data = (await res.json().catch(() => ({}))) as { lead?: Lead; error?: string; code?: string };
+        if (res.status === 409 && data.code === "slot-taken") {
+          setSlotWarning({ message: data.error ?? "That window is already booked.", id: null, body });
+          return;
+        }
+        if (!res.ok || !data.lead) {
+          notify(data.error ?? "Couldn't create the lead. Check your connection and try again.");
+          return;
+        }
+        setLeads((ls) => [data.lead!, ...ls]);
+        setCreating(false);
+        setSelected(data.lead.id);
+      } catch {
+        notify("Couldn't create the lead. Check your connection and try again.");
       }
-      if (!res.ok || !data.lead) {
-        notify(data.error ?? "Couldn't create the lead.");
-        return;
-      }
-      setLeads((ls) => [data.lead!, ...ls]);
-      setCreating(false);
-      setSelected(data.lead.id);
     },
-    [notify],
+    [notify, router],
   );
 
   const remove = useCallback(

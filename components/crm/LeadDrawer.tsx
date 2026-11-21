@@ -120,9 +120,12 @@ function Panel({ lead, onClose, onPatch, onCreate, onDelete }: PanelProps) {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
-    if (lead) await onPatch(lead.id, toBody(draft));
-    else await onCreate(toBody(draft));
-    setSaving(false);
+    try {
+      if (lead) await onPatch(lead.id, toBody(draft));
+      else await onCreate(toBody(draft));
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function addNote() {

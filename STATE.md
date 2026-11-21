@@ -32,3 +32,8 @@ Not done: html lang server-side for /es (needs per-locale root layouts, big refa
 ## Excellence fix round 6 (2026-11-21), grade was 77
 Done: `<html lang>` server-rendered per language: two root layouts `app/(en)/layout.tsx` and `app/(es)/layout.tsx` (shared `lib/root-layout.tsx`, `components/site/SiteLayout.tsx`), `app/global-not-found.tsx` (experimental.globalNotFound); e2e test. Perf: `components/site/Deferred.tsx` (shader, cursor, chat load after idle; none on touch/reduced motion), LazyMotion + `m` in site components; Lighthouse mobile 0.85-0.98 (median 0.93, committed). Fixed real bug: CRM lead PATCH slot-taken 409 was shown as stale-edit (Dashboard.tsx). Forced-failure check done on real Vercel previews (evidence in docs/evidence/2026-11-21/forced-failure; env overrides and branch removed; Vercel protection-bypass secret generated for project). Owner-flow walkthrough videos + fresh screenshots (`npm run evidence`, now includes owner-flows spec). Latest update card rewritten for round 6.
 Not done: eval (no key, waived). Main not pushed by me (COO pushes); /es lang is only live after that.
+
+## Excellence round 7 fixes (2026-11-21)
+- Guarded create-lead (try/catch, 401 redirect, safe json) and LeadDrawer.save (try/finally).
+- /admin: backup and leads-waiting rows say "can't read/check while storage is down" (Unknown).
+- Still open (evidence only): tab-icon light/dark, offline/200% zoom/WebKit runs, live Lighthouse, clean-data screenshots.

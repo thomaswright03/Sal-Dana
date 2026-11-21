@@ -138,12 +138,12 @@ export async function getStatus(now = new Date()): Promise<StatusReport> {
     "leads-waiting-email",
     "Leads waiting for their email",
     !storageUp ? "unknown" : pending === 0 ? "ok" : "warning",
-    pending === 0 ? "None." : `${pending} lead(s) saved but their email hasn't gone out yet. The daily job and the next successful send try again.`,
+    !storageUp ? "Can't check while storage is down." : pending === 0 ? "None." : `${pending} lead(s) saved but their email hasn't gone out yet. The daily job and the next successful send try again.`,
   );
 
   // Basic
   const backupBase = fromOps("backup", "Latest backup", ops.backup, { staleAfterMs: 2 * DAY, neverDetail: "No backup has run yet.", schedule: SCHEDULES.backup }, now);
-  const backup = { ...backupBase, detail: backupBase.status === "ok" ? "" : `${backupBase.detail} ${backups.length} snapshot(s) kept.`.trim() };
+  const backup = !storageUp ? { ...backupBase, status: "unknown" as Status, detail: "Can't read backups while storage is down." } : { ...backupBase, detail: backupBase.status === "ok" ? "" : `${backupBase.detail} ${backups.length} snapshot(s) kept.`.trim() };
   const secondStore = item(
     "backup-second-store",
     "Backup in a second store",
