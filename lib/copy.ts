@@ -276,7 +276,7 @@ const es: Copy = {
     tagline: "Reparaciones y renovaciones, terminadas con un estándar más alto.",
   },
   region: REGION_ES,
-  hours: "Lunes a sábado, de 8 a. m. a 5 p. m.",
+  hours: "Normalmente de lunes a sábado, de 8 a. m. a 5 p. m. (se confirma al agendar)",
   registered: "Reparaciones y remodelaciones en Arizona",
   bookCta: "Agenda una visita",
   scroll: "Desliza",
@@ -396,7 +396,7 @@ const es: Copy = {
       },
       {
         title: "El trabajo",
-        body: "Un solo artesano, en tu casa a la hora acordada. Pisos protegidos, el espacio ordenado y el trabajo bien hecho.",
+        body: "Alan se ocupa de tu trabajo personalmente. Pisos protegidos, el espacio ordenado y el trabajo bien hecho.",
       },
       {
         title: "Revisión final",
@@ -411,7 +411,7 @@ const es: Copy = {
     principles: [
       {
         title: "Un solo artesano",
-        body: "La persona con la que hablas es la que hace el trabajo. Sin relevos ni sorpresas de subcontratistas.",
+        body: "Alan es tu contacto, desde la primera llamada hasta la revisión final.",
       },
       {
         title: "Presupuestos claros",

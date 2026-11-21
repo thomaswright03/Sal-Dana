@@ -21,7 +21,7 @@ export function LegalPage({ locale, kind }: { locale: Locale; kind: "privacy" | 
             <h2 className="text-lg font-medium text-bone">{s.h}</h2>
             {s.p.map((p) => (
               <p key={p} className="mt-3 leading-relaxed">
-                {p}
+                {p.split("**").map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))}
               </p>
             ))}
           </section>

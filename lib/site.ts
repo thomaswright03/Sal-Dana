@@ -21,7 +21,7 @@ export const site = {
   cities: ["Scottsdale", "Paradise Valley", "Tempe", "Mesa", "Chandler", "Gilbert", "Queen Creek", "Phoenix"],
   // Assumed working hours, used by the booking assistant. Day 0 = Sunday.
   workingDays: [1, 2, 3, 4, 5, 6],
-  hoursDisplay: "Monday to Saturday, 8am to 5pm",
+  hoursDisplay: "Typically Monday to Saturday, 8am to 5pm (confirmed when you book)",
   timezone: "America/Phoenix",
 } as const;
 
@@ -100,7 +100,7 @@ export const processSteps = [
   },
   {
     title: "The work",
-    body: "One craftsman, on site when he says he will be. Floors protected, the space kept tidy, the job done right.",
+    body: "Alan looks after your job personally. Floors protected, the space kept tidy, the job done right.",
   },
   {
     title: "Final walkthrough",
@@ -111,7 +111,7 @@ export const processSteps = [
 export const principles = [
   {
     title: "One craftsman",
-    body: "The person you talk to is the person who does the work. No handoffs, no subcontracted surprises.",
+    body: "Alan is your point of contact, from the first call to the final walkthrough.",
   },
   {
     title: "Clear estimates",

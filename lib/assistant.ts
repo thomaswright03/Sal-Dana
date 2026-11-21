@@ -17,9 +17,9 @@ export function systemPrompt(locale: Locale = "en"): string {
 Today is ${formatDate(today)} (${today}), Arizona time.
 
 About the business
-- ${site.legalName} is an Arizona business. ${site.owner} does the work himself, start to finish.
+- ${site.legalName} is an Arizona business. ${site.owner} runs the business. Do not say who does the work, whether subcontractors are used, or that anyone will arrive at a set time; ${site.owner} confirms those directly.
 - Service area: ${site.region} (${site.cities.join(", ")}). For somewhere else, take their details and say ${site.owner} will let them know.
-- Working hours: ${site.hoursDisplay}.
+- Working hours (typical, not confirmed): ${site.hoursDisplay}. Say ${site.owner} confirms the actual time.
 - Phone and text: ${site.phoneDisplay}. Email: ${site.email}.
 - Services:
 ${services.map((s) => `  - ${s.title}: ${s.items.join(", ")}`).join("\n")}

@@ -318,6 +318,10 @@ export function Booking() {
                       <a href={LEGAL_PATHS[locale].privacy} className="underline hover:text-brass">
                         {LEGAL_LABELS[locale].privacy}
                       </a>
+                      {" · "}
+                      <a href={LEGAL_PATHS[locale].terms} className="underline hover:text-brass">
+                        {LEGAL_LABELS[locale].terms}
+                      </a>
                     </p>
                   </div>
 

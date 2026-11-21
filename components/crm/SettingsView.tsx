@@ -209,14 +209,19 @@ export function SettingsView() {
 
         <Card className="p-5 sm:p-6" index={4}>
           <h2 className="text-[0.9375rem] font-medium text-bone">Latest update</h2>
-          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Legal round 1.</p>
-          <ul className="mt-4 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
-            <li>Website: new Privacy policy and Terms pages in English and Spanish, linked in the footer, beside the booking button and in the chat.</li>
-            <li>Website: the chat now tells visitors, before they type, that chats are saved and processed by Anthropic.</li>
-            <li>Website: removed the “registered LLC” claims until the entity number is confirmed; reviews are labelled as selected.</li>
-            <li>Dashboard: reviews need a “permission on record” note before they can be shown, and can carry a relationship or incentive note.</li>
-            <li>Dashboard: leads that never became a job are deleted after 24 months and chat transcripts after 12 (weekly job).</li>
-            <li>Assistant: declines do-it-yourself safety, legal and financial advice. Ask AI no longer searches phone numbers or emails.</li>
+          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Legal round 2.</p>
+          <h3 className="mt-4 text-xs font-medium text-bone">Frontend changes (website)</h3>
+          <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
+            <li>Removed unconfirmed claims (“no subcontracted surprises”, “on site when he says he will be”) in English and Spanish; hours now read “typically”, confirmed when booking.</li>
+            <li>The booking form now links the Terms beside the Privacy policy.</li>
+            <li>Terms: 18+ line, how to report or remove a review, visitor indemnity, and bold disclaimer and liability limit.</li>
+            <li>Earlier (round 1): Privacy and Terms pages, chat notice about Anthropic, “registered LLC” claims removed, reviews labelled as selected.</li>
+          </ul>
+          <h3 className="mt-4 text-xs font-medium text-bone">Other changes (dashboard and assistant)</h3>
+          <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
+            <li>Assistant no longer says who does the work or that anyone arrives at a set time; hours are described as typical.</li>
+            <li>Weekly retention job now has its secret set, so old leads (24 months) and chat transcripts (12 months) are deleted.</li>
+            <li>Earlier (round 1): reviews need a permission note; assistant declines DIY, legal and financial advice; Ask AI skips phone and email search.</li>
           </ul>
         </Card>
 
