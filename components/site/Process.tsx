@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useSpring } from "motion/react";
+import { m as motion, useScroll, useSpring } from "motion/react";
 import { useRef } from "react";
 import { FadeUp, RevealLines } from "./Reveal";
 import { headingLines, useCopy } from "./useCopy";

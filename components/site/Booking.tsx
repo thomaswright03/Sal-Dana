@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m as motion } from "motion/react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { services, site, windows, type WindowId } from "@/lib/site";
 import { formatDate } from "@/lib/schedule";

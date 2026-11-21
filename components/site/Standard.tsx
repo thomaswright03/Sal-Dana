@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionTemplate, useMotionValue } from "motion/react";
+import { m as motion, useMotionTemplate, useMotionValue } from "motion/react";
 import type { PointerEvent } from "react";
 import { EASE } from "./Intro";
 import { FadeUp, RevealLines } from "./Reveal";

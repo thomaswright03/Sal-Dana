@@ -1,7 +1,7 @@
 "use client";
 
 import { useReduced } from "./useReduced";
-import { motion, useMotionValue, useSpring } from "motion/react";
+import { m as motion, useMotionValue, useSpring } from "motion/react";
 import type { PointerEvent, ReactNode } from "react";
 
 /** Pulls its child toward the pointer, like a magnet, and springs back on leave. */

@@ -13,3 +13,10 @@ for (const reducedMotion of ["reduce", "no-preference"] as const) {
     await page.close();
   });
 }
+
+test("Spanish pages are served with lang=es from the server", async ({ request }) => {
+  for (const path of ["/es", "/es/privacy", "/es/terms"]) {
+    expect(await (await request.get(path)).text()).toContain('<html lang="es"');
+  }
+  expect(await (await request.get("/")).text()).toContain('<html lang="en"');
+});

@@ -1,13 +1,13 @@
 "use client";
 
 import { useReduced } from "./useReduced";
-import { motion, useScroll, useTransform } from "motion/react";
+import { m as motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { site } from "@/lib/site";
 import { Button } from "./Button";
 import { EASE, useIntroDone } from "./Intro";
 import { FadeUp, RevealLines } from "./Reveal";
-import { ShaderCanvas } from "./ShaderCanvas";
+import { DeferredShader } from "./Deferred";
 import { headingLines, useCopy } from "./useCopy";
 
 export function Hero() {
@@ -28,7 +28,7 @@ export function Hero() {
         className="absolute inset-0 bg-[radial-gradient(120%_90%_at_75%_20%,#2b2014_0%,#131210_45%,#0b0a09_80%)]"
         style={reduce ? undefined : { y: bgY, scale: bgScale }}
       >
-        <ShaderCanvas />
+        <DeferredShader />
       </motion.div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-ink to-transparent" />
 

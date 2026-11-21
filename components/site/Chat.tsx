@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m as motion } from "motion/react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { LEGAL_LABELS, LEGAL_PATHS } from "@/lib/legal";
 import { track } from "@/lib/track";

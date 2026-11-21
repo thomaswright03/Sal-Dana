@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { DEMO_MODE } from "@/lib/demo";
 import { site } from "@/lib/site";
-import "./globals.css";
+import "@/app/globals.css";
+import type { ReactNode } from "react";
 
 const sans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -41,9 +42,9 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export function RootHtml({ lang, children }: { lang: "en" | "es"; children: ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable} ${display.variable}`}>
+    <html lang={lang} className={`${sans.variable} ${mono.variable} ${display.variable}`}>
       <body className="min-h-dvh">{children}</body>
     </html>
   );

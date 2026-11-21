@@ -2,7 +2,7 @@
 
 import { useReduced } from "./useReduced";
 import {
-  motion,
+  m as motion,
   useAnimationFrame,
   useMotionValue,
   useScroll,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useReduced } from "./useReduced";
-import { motion } from "motion/react";
+import { m as motion } from "motion/react";
 import type { ReactNode } from "react";
 import { EASE } from "./Intro";
 

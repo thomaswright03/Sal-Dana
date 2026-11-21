@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useSpring } from "motion/react";
+import { m as motion, useMotionValue, useSpring } from "motion/react";
 import { useEffect, useState } from "react";
 import { useMounted } from "@/lib/use-mounted";
 

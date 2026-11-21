@@ -1,6 +1,6 @@
 "use client";
 
-import { animate, AnimatePresence, motion, useMotionValue, useTransform } from "motion/react";
+import { animate, AnimatePresence, m as motion, useMotionValue, useTransform } from "motion/react";
 import { useEffect, useState } from "react";
 import { EASE, EASE_IN_OUT } from "./Intro";
 import { useCopy } from "./useCopy";

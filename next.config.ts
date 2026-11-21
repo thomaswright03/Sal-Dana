@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   env: { BUILD_TIME: new Date().toISOString() },
   /* config options here */
   cacheComponents: true,
+  experimental: { globalNotFound: true },
   partialPrefetching: true,
   turbopack: {
     rules: {

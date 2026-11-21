@@ -1,4 +1,5 @@
-import { Chat } from "@/components/site/Chat";
+import type { ReactNode } from "react";
+import { DeferredChat } from "@/components/site/Deferred";
 import { Nav } from "@/components/site/Nav";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Track } from "@/components/site/Track";
@@ -34,7 +35,7 @@ const jsonLd = {
   ],
 };
 
-export default async function SiteLayout({ children }: LayoutProps<"/">) {
+export async function SiteLayout({ children }: { children: ReactNode }) {
   const hasReviews = (await getPublishedReviews()).length > 0;
   return (
     <>
@@ -48,7 +49,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       <SiteShell>
         <Nav hasReviews={hasReviews} />
         {children}
-        <Chat />
+        <DeferredChat />
         <Track />
       </SiteShell>
     </>

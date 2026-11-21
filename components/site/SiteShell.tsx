@@ -1,8 +1,9 @@
 "use client";
 
 import Lenis from "lenis";
+import { LazyMotion } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
-import { Cursor } from "./Cursor";
+import { DeferredCursor } from "./Deferred";
 import { IntroContext } from "./Intro";
 import { Preloader } from "./Preloader";
 
@@ -25,10 +26,13 @@ export function SiteShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <IntroContext.Provider value={introDone}>
-      <Preloader onDone={() => setIntroDone(true)} />
-      <Cursor />
-      <div className="grain has-cursor relative">{children}</div>
-    </IntroContext.Provider>
+    // The animation engine loads as its own chunk after first paint instead of blocking it.
+    <LazyMotion features={() => import("./motionFeatures").then((mod) => mod.default)}>
+      <IntroContext.Provider value={introDone}>
+        <Preloader onDone={() => setIntroDone(true)} />
+        <DeferredCursor />
+        <div className="grain has-cursor relative">{children}</div>
+      </IntroContext.Provider>
+    </LazyMotion>
   );
 }

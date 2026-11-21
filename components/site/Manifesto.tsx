@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
+import { m as motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { useRef } from "react";
 import { FadeUp } from "./Reveal";
 import { useCopy } from "./useCopy";

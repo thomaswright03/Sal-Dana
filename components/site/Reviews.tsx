@@ -1,7 +1,7 @@
 "use client";
 
 import { useReduced } from "./useReduced";
-import { motion } from "motion/react";
+import { m as motion } from "motion/react";
 import type { PublicReview } from "@/lib/types";
 import { EASE } from "./Intro";
 import { FadeUp, RevealLines } from "./Reveal";

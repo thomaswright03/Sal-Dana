@@ -1,7 +1,7 @@
 "use client";
 
 import { useReduced } from "./useReduced";
-import { motion } from "motion/react";
+import { m as motion } from "motion/react";
 import { EASE } from "./Intro";
 
 const rect = (x: number, y: number, w: number, h: number) => `M${x} ${y}h${w}v${h}h${-w}z`;
