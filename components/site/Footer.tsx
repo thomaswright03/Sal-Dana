@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 import { Button } from "./Button";
 import { FadeUp } from "./Reveal";
 import { LOCALE_NAMES, LOCALE_PATHS } from "@/lib/i18n";
+import { LEGAL_LABELS, LEGAL_PATHS } from "@/lib/legal";
 import { useCopy, useLocale } from "./useCopy";
 
 export function Footer() {
@@ -100,11 +101,19 @@ export function Footer() {
       <div className="relative border-t border-line bg-ink">
         <div className="shell flex flex-col gap-2 py-6 text-xs text-dust sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © 2026 {site.legalName}. {t.footer.legal}
+            © 2026 {site.legalName}.{t.footer.legal ? ` ${t.footer.legal}` : ""}
           </p>
-          <a href="/crm" className="transition-colors hover:text-brass">
-            {t.footer.owner}
-          </a>
+          <nav aria-label="Legal" className="flex flex-wrap gap-x-5 gap-y-1">
+            <a href={LEGAL_PATHS[locale].privacy} className="transition-colors hover:text-brass">
+              {LEGAL_LABELS[locale].privacy}
+            </a>
+            <a href={LEGAL_PATHS[locale].terms} className="transition-colors hover:text-brass">
+              {LEGAL_LABELS[locale].terms}
+            </a>
+            <a href="/crm" className="transition-colors hover:text-brass">
+              {t.footer.owner}
+            </a>
+          </nav>
         </div>
       </div>
     </footer>

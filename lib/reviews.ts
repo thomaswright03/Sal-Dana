@@ -14,6 +14,9 @@ export async function listReviews(): Promise<Review[]> {
   return all.sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
 }
 
+export const PERMISSION_ERROR =
+  "Record how and when the customer agreed to their review being shown (for example: texted yes on 2026-11-20) before showing it on the website.";
+
 export type NewReview = Omit<Review, "id" | "createdAt">;
 
 export async function createReview(input: NewReview): Promise<Review> {
@@ -60,6 +63,7 @@ export function toPublic(r: Review): PublicReview {
     text: r.text,
     date: r.date,
     source: r.source,
+    relationship: r.relationship ?? "",
     ...(r.demo ? { demo: true } : {}),
   };
 }

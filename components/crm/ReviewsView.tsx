@@ -22,7 +22,9 @@ const blank = (): Draft => ({
   text: "",
   date: todayAz(),
   source: "google",
-  published: true,
+  permission: "",
+  relationship: "",
+  published: false,
 });
 
 const monthYear = (date: string) =>
@@ -424,6 +426,8 @@ function ReviewForm({
           text: review.text,
           date: review.date,
           source: review.source,
+          permission: review.permission ?? "",
+          relationship: review.relationship ?? "",
           published: review.published,
         }
       : blank(),
@@ -562,6 +566,30 @@ function ReviewForm({
                 className={`${field} [color-scheme:dark]`}
               />
             </label>
+            <label className="col-span-2 block">
+              <span className="eyebrow mb-2 block">Permission on record (required to show it)</span>
+              <input
+                value={draft.permission}
+                onChange={(e) => set("permission", e.target.value)}
+                maxLength={300}
+                placeholder="Who agreed, when and where, e.g. Maria texted yes on 2026-11-20"
+                className={field}
+              />
+            </label>
+            <label className="col-span-2 block">
+              <span className="eyebrow mb-2 block">Relationship or incentive (leave blank if none)</span>
+              <input
+                value={draft.relationship}
+                onChange={(e) => set("relationship", e.target.value)}
+                maxLength={300}
+                placeholder="Family, staff, paid, discount or free work in return"
+                className={field}
+              />
+            </label>
+            <p className="col-span-2 text-xs leading-relaxed text-dust">
+              Show only real reviews from real customers who agreed. Don’t hide honest reviews you dislike
+              or only publish good ones to mislead: that is review gating.
+            </p>
             <label className="col-span-2 flex items-center gap-3 text-sm text-sand">
               <input
                 type="checkbox"

@@ -58,6 +58,7 @@ function Card({ review }: { review: PublicReview }) {
           <span className="block text-xs text-dust">
             {[review.city, service].filter(Boolean).join(" · ")}
           </span>
+          {review.relationship && <span className="block text-xs text-brass">{review.relationship}</span>}
         </span>
       </figcaption>
     </figure>

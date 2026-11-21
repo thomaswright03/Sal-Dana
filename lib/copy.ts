@@ -137,7 +137,7 @@ const en: Copy = {
   },
   region: site.region,
   hours: site.hoursDisplay,
-  registered: "Registered Arizona LLC",
+  registered: "Arizona handyman & renovations",
   bookCta: "Book a visit",
   scroll: "Scroll",
   nav: {
@@ -191,7 +191,7 @@ const en: Copy = {
     heading: { first: "Word of mouth,", accent: "written down." },
     sample: "Sample reviews for preview",
     onGoogle: "Reviews on Google",
-    fromCount: (n) => `From ${n} customer reviews`,
+    fromCount: (n) => `${n} selected customer reviews`,
     stars: (n) => `${n} out of 5 stars`,
   },
   area: {
@@ -219,7 +219,7 @@ const en: Copy = {
     detailsPlaceholder: "A few words about what needs doing",
     submit: "Request a visit",
     sending: "Sending",
-    privacy: "We only use your details to get back to you about your project.",
+    privacy: "We keep your details to get back to you about your project. Our AI assistant is run by Anthropic.",
     doneBooked: "Visit requested.",
     doneReceived: "Request received.",
     doneBody: `Thank you. ${site.owner} will be in touch shortly by call or text to confirm the details.`,
@@ -241,7 +241,7 @@ const en: Copy = {
     hours: "Hours",
     area: "Area",
     explore: "Explore",
-    legal: "A registered Arizona limited liability company.",
+    legal: "",
     owner: "Owner sign-in",
   },
   chat: {
@@ -277,7 +277,7 @@ const es: Copy = {
   },
   region: REGION_ES,
   hours: "Lunes a sábado, de 8 a. m. a 5 p. m.",
-  registered: "LLC registrada en Arizona",
+  registered: "Reparaciones y remodelaciones en Arizona",
   bookCta: "Agenda una visita",
   scroll: "Desliza",
   nav: {
@@ -432,7 +432,7 @@ const es: Copy = {
     heading: { first: "De boca en boca,", accent: "por escrito." },
     sample: "Reseñas de muestra para la vista previa",
     onGoogle: "Reseñas en Google",
-    fromCount: (n) => `De ${n} reseñas de clientes`,
+    fromCount: (n) => `${n} reseñas de clientes seleccionadas`,
     stars: (n) => `${n} de 5 estrellas`,
   },
   area: {
@@ -460,7 +460,7 @@ const es: Copy = {
     detailsPlaceholder: "Unas palabras sobre lo que hay que hacer",
     submit: "Solicitar una visita",
     sending: "Enviando",
-    privacy: "Solo usamos tus datos para responderte sobre tu proyecto.",
+    privacy: "Guardamos tus datos para responderte sobre tu proyecto. Nuestro asistente de IA lo opera Anthropic.",
     doneBooked: "Visita solicitada.",
     doneReceived: "Solicitud recibida.",
     doneBody: `Gracias. ${site.owner} se pondrá en contacto contigo pronto, por llamada o mensaje, para confirmar los detalles.`,
@@ -490,8 +490,8 @@ const es: Copy = {
         a: "En Phoenix y el East Valley, incluyendo Scottsdale, Paradise Valley, Tempe, Mesa, Chandler y Gilbert. Si estás fuera de esa zona, escríbenos y vemos qué se puede hacer.",
       },
       {
-        q: `¿${site.name} es un negocio registrado?`,
-        a: `Sí. ${site.legalName} es una compañía de responsabilidad limitada registrada en Arizona.`,
+        q: `¿Quién dirige ${site.name}?`,
+        a: `${site.legalName} es un negocio de reparaciones y remodelaciones de Arizona dirigido por ${site.owner}. Si tienes preguntas sobre licencias o seguro, pregúntale directamente a ${site.owner}.`,
       },
     ],
   },
@@ -503,7 +503,7 @@ const es: Copy = {
     hours: "Horario",
     area: "Zona",
     explore: "Explora",
-    legal: "Una compañía de responsabilidad limitada registrada en Arizona.",
+    legal: "",
     owner: "Acceso del propietario",
   },
   chat: {

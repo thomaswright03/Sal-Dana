@@ -207,6 +207,19 @@ export function SettingsView() {
           </ul>
         </Card>
 
+        <Card className="p-5 sm:p-6" index={4}>
+          <h2 className="text-[0.9375rem] font-medium text-bone">Latest update</h2>
+          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Legal round 1.</p>
+          <ul className="mt-4 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
+            <li>Website: new Privacy policy and Terms pages in English and Spanish, linked in the footer, beside the booking button and in the chat.</li>
+            <li>Website: the chat now tells visitors, before they type, that chats are saved and processed by Anthropic.</li>
+            <li>Website: removed the “registered LLC” claims until the entity number is confirmed; reviews are labelled as selected.</li>
+            <li>Dashboard: reviews need a “permission on record” note before they can be shown, and can carry a relationship or incentive note.</li>
+            <li>Dashboard: leads that never became a job are deleted after 24 months and chat transcripts after 12 (weekly job).</li>
+            <li>Assistant: declines do-it-yourself safety, legal and financial advice. Ask AI no longer searches phone numbers or emails.</li>
+          </ul>
+        </Card>
+
         <Card className="p-5 sm:p-6" index={3}>
           <h2 className="text-[0.9375rem] font-medium text-bone">Access</h2>
           <ul className="mt-5 divide-y divide-line/70">

@@ -86,6 +86,10 @@ export interface Review {
   /** When the review was left, YYYY-MM-DD */
   date: string;
   source: ReviewSource;
+  /** How and when the customer agreed to the review being shown (who, when, where). Required to publish. */
+  permission: string;
+  /** Any family, staff, business relationship or incentive, shown beside the review when set. */
+  relationship: string;
   /** Shown on the public website */
   published: boolean;
   /** True for sample reviews loaded to preview the site */
@@ -95,7 +99,7 @@ export interface Review {
 /** What the public site needs to show a review. */
 export type PublicReview = Pick<
   Review,
-  "id" | "name" | "city" | "service" | "rating" | "text" | "date" | "source"
+  "id" | "name" | "city" | "service" | "rating" | "text" | "date" | "source" | "relationship"
 > & {
   demo?: boolean;
 };

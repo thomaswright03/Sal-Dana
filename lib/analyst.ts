@@ -64,7 +64,7 @@ export const analystTools: Anthropic.Beta.BetaTool[] = [
         },
         service: { type: "string", description: "Part of the service name, e.g. 'tile'." },
         city: { type: "string", description: "Part of the city or address." },
-        text: { type: "string", description: "Words to look for in the name, phone, details or notes." },
+        text: { type: "string", description: "Words to look for in the name, details or notes." },
         created_from: dateProp("Leads that arrived on or after this day."),
         created_to: dateProp("Leads that arrived on or before this day."),
         visit_from: dateProp("Leads with a visit on or after this day."),
@@ -227,7 +227,7 @@ export async function runAnalystTool(name: string, input: unknown): Promise<Tool
         if (f.status && !f.status.includes(l.status)) return false;
         if (f.source && !f.source.includes(l.source)) return false;
         if (!has(l.service, f.service) || !has(l.address, f.city)) return false;
-        if (!has([l.name, l.phone, l.email, l.details, ...l.notes.map((n) => n.text)].join(" "), f.text))
+        if (!has([l.name, l.details, ...l.notes.map((n) => n.text)].join(" "), f.text))
           return false;
         if (f.created_from && arrived < f.created_from) return false;
         if (f.created_to && arrived > f.created_to) return false;

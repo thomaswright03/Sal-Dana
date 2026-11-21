@@ -12,7 +12,7 @@ export async function getPublishedReviews(): Promise<PublicReview[]> {
   cacheTag(REVIEWS_TAG);
   cacheLife("hours");
   try {
-    return (await listReviews()).filter((r) => r.published).map(toPublic);
+    return (await listReviews()).filter((r) => r.published && (r.demo || r.permission?.trim())).map(toPublic);
   } catch {
     // No storage yet (for example a first build): the section simply stays hidden.
     return [];

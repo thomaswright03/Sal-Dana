@@ -71,6 +71,8 @@ export const reviewSchema = z.object({
   text: text(1500).min(1, "Add what they wrote"),
   date: dateSchema,
   source: z.enum(REVIEW_SOURCES),
+  permission: text(300).default(""),
+  relationship: text(300).default(""),
   published: z.boolean(),
 });
 

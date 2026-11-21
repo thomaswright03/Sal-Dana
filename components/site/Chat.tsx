@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { LEGAL_LABELS, LEGAL_PATHS } from "@/lib/legal";
 import { track } from "@/lib/track";
 import { EASE, useIntroDone } from "./Intro";
 import { useCopy, useLocale } from "./useCopy";
@@ -350,7 +351,12 @@ export function Chat() {
                   </svg>
                 </button>
               </div>
-              <p className="mt-2 text-center text-[0.625rem] text-dust">{t.footnote}</p>
+              <p className="mt-2 text-center text-[0.625rem] leading-relaxed text-dust">
+                {t.footnote} {LEGAL_LABELS[locale].chatNotice}{" "}
+                <a href={LEGAL_PATHS[locale].privacy} className="underline hover:text-brass">
+                  {LEGAL_LABELS[locale].privacy}
+                </a>
+              </p>
             </form>
           </motion.div>
         )}

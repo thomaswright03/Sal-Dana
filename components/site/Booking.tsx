@@ -9,6 +9,7 @@ import { EASE } from "./Intro";
 import { Magnetic } from "./Magnetic";
 import { FadeUp, RevealLines } from "./Reveal";
 import { WINDOW_TEXT } from "@/lib/i18n";
+import { LEGAL_LABELS, LEGAL_PATHS } from "@/lib/legal";
 import { headingLines, useCopy, useLocale } from "./useCopy";
 
 type State =
@@ -312,7 +313,12 @@ export function Booking() {
                     <Button type="submit" disabled={state.kind === "sending"}>
                       {state.kind === "sending" ? b.sending : b.submit}
                     </Button>
-                    <p className="max-w-[16rem] text-xs leading-relaxed text-dust">{b.privacy}</p>
+                    <p className="max-w-[16rem] text-xs leading-relaxed text-dust">
+                      {b.privacy}{" "}
+                      <a href={LEGAL_PATHS[locale].privacy} className="underline hover:text-brass">
+                        {LEGAL_LABELS[locale].privacy}
+                      </a>
+                    </p>
                   </div>
 
                   {state.kind === "error" && (

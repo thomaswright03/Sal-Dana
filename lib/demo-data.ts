@@ -195,6 +195,8 @@ function sampleReviews(): NewReview[] {
     text: r.text,
     date: addDays(today, -r.ago),
     source: r.source,
+    permission: "",
+    relationship: "",
     published: true,
   }));
 }

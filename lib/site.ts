@@ -145,7 +145,7 @@ export const faqs = [
     a: "Across Phoenix and the East Valley, including Scottsdale, Paradise Valley, Tempe, Mesa, Chandler, and Gilbert. Outside that area, get in touch and we’ll see what’s possible.",
   },
   {
-    q: "Is Sal Dana Renovations a registered business?",
-    a: "Yes. Sal Dana Renovations LLC is a registered Arizona limited liability company.",
+    q: "Who runs Sal Dana Renovations?",
+    a: "Sal Dana Renovations LLC is an Arizona handyman and renovation business run by Alan. For questions about licensing or insurance, ask Alan directly and he will answer.",
   },
 ] as const;

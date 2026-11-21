@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { requireOwner, storageError } from "@/lib/crm-guard";
-import { createReview, listReviews, REVIEWS_TAG } from "@/lib/reviews";
+import { createReview, listReviews, PERMISSION_ERROR, REVIEWS_TAG } from "@/lib/reviews";
 import { reviewSchema } from "@/lib/validation";
 
 export async function GET() {
@@ -23,6 +23,9 @@ export async function POST(req: Request) {
       { error: parsed.error.issues[0]?.message ?? "Check the review." },
       { status: 400 },
     );
+  }
+  if (parsed.data.published && !parsed.data.permission) {
+    return NextResponse.json({ error: PERMISSION_ERROR }, { status: 400 });
   }
   try {
     const review = await createReview(parsed.data);
