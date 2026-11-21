@@ -158,15 +158,16 @@ export function Dashboard() {
           body: JSON.stringify({ ...body, expectedUpdatedAt: seen }),
         });
         if (res.status === 401) return router.replace("/crm/login");
-        if (res.status === 409) {
-          setLeads(before);
-          setConflict(true);
-          return;
-        }
-        const data = (await res.json()) as { lead?: Lead; error?: string; code?: string };
+        const data = (await res.json().catch(() => ({}))) as { lead?: Lead; error?: string; code?: string };
+        // A 409 is either "someone changed this lead" or "that visit window is taken"; they need different prompts.
         if (res.status === 409 && data.code === "slot-taken") {
           setLeads(before);
           setSlotWarning({ message: data.error ?? "That window is already booked.", id, body });
+          return;
+        }
+        if (res.status === 409) {
+          setLeads(before);
+          setConflict(true);
           return;
         }
         if (!res.ok || !data.lead) throw new Error(data.error ?? "Couldn't save.");

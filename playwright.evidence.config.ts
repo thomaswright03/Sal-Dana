@@ -17,6 +17,8 @@ export default defineConfig({
       ADMIN_PASSWORD: "e2e-admin-password-123",
       ADMIN_STATUS_TOKEN: "e2e-status-token-123456",
       NEXT_PUBLIC_DEMO_MODE: "1",
+      // A dummy key only so the dashboard shows the assistant switch; the assistant is never called here.
+      ANTHROPIC_API_KEY: "sk-evidence-placeholder",
     },
   },
 });

@@ -1,0 +1,124 @@
+{
+  "product": "Sal Dana Renovations",
+  "checked_at": "2026-11-21T01:56:23.099Z",
+  "overall": "down",
+  "functions": [
+    {
+      "tier": "important",
+      "name": "Booking form saves a lead",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": "2026-11-21T01:56:16.600Z",
+      "next_expected_run": null,
+      "detail": ""
+    },
+    {
+      "tier": "important",
+      "name": "Assistant books a visit",
+      "status": "warning",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "Assistant is off: no Anthropic key is set. Visitors see the call-instead message."
+    },
+    {
+      "tier": "important",
+      "name": "New-lead email",
+      "status": "down",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "RESEND_API_KEY is not set: Alan is not told about new leads."
+    },
+    {
+      "tier": "important",
+      "name": "Leads waiting for their email",
+      "status": "warning",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "1 lead(s) saved but their email hasn't gone out yet. The daily job and the next successful send try again."
+    },
+    {
+      "tier": "key",
+      "name": "Anthropic API",
+      "status": "warning",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "No API key set; the assistant is not switched on."
+    },
+    {
+      "tier": "key",
+      "name": "Retention cron",
+      "status": "unknown",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": null,
+      "next_expected_run": "2026-11-23T10:00:00.000Z",
+      "detail": "Hasn't run yet."
+    },
+    {
+      "tier": "key",
+      "name": "Visitor tracking",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": "2026-11-21T01:56:23.099Z",
+      "next_expected_run": null,
+      "detail": ""
+    },
+    {
+      "tier": "basic",
+      "name": "Blob storage",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": "2026-11-21T01:56:23.099Z",
+      "next_expected_run": null,
+      "detail": ""
+    },
+    {
+      "tier": "basic",
+      "name": "CRM sign-in",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": "2026-11-21T01:56:23.099Z",
+      "next_expected_run": null,
+      "detail": ""
+    },
+    {
+      "tier": "basic",
+      "name": "Latest backup",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": "2026-11-21T01:26:11.327Z",
+      "next_expected_run": "2026-11-21T11:00:00.000Z",
+      "detail": ""
+    },
+    {
+      "tier": "basic",
+      "name": "Backup in a second store",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": "2026-11-21T01:56:23.099Z",
+      "next_expected_run": null,
+      "detail": ""
+    },
+    {
+      "tier": "basic",
+      "name": "AI kill switch",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": "2026-11-21T01:56:23.099Z",
+      "next_expected_run": null,
+      "detail": ""
+    },
+    {
+      "tier": "basic",
+      "name": "Deployed version (94f451c, preview mode)",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:56:23.099Z",
+      "last_success": "2026-11-21T01:56:23.099Z",
+      "next_expected_run": null,
+      "detail": ""
+    }
+  ]
+}

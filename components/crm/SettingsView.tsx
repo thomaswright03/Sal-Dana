@@ -245,20 +245,18 @@ export function SettingsView() {
 
         <Card className="p-5 sm:p-6" index={4}>
           <h2 className="text-body font-medium text-bone">Latest update</h2>
-          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Round 5: business hours 9 AM to 5 PM, Schedule fit, and cleanups.</p>
+          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Round 6: faster phone loading, Spanish page language, and a visit-conflict fix.</p>
           <h3 className="mt-4 text-xs font-medium text-bone">Frontend changes</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
-            <li>Website, English and Spanish, hours and Book a visit form: hours now read “Monday to Saturday, 9am to 5pm” with no “typically”, and the Morning window is 9 to 11am.</li>
-            <li>Schedule: the Morning window starts at 9, the heading line reads correctly, and all six days fit on a laptop screen (the side column sits below the calendar on narrower desktops).</li>
-            <li>Settings, Hours row: shows the confirmed 9 AM to 5 PM. The booking assistant states the same hours.</li>
-            <li>Website, language link (ES / EN): its spoken label now includes the visible letters.</li>
-            <li>Round 4: Leads keeps the status filter and search in the address bar; new favicon; small text moved to a type scale (11px minimum); better contrast on the lost chip and count badges; bigger sample-review label.</li>
+            <li>Website: loads faster on phones. The animated hero background, the custom cursor and the chat widget now load after the page first appears, and not at all on touch screens or with reduced motion (hero background and cursor).</li>
+            <li>Website, Spanish pages: the page language is now “es” from the first byte, so screen readers and translation tools treat /es as Spanish straight away.</li>
+            <li>Schedule and Leads: when a visit window is already taken, you now get “Book it anyway” as intended. Before, it wrongly said the lead had changed.</li>
+            <li>Round 5: hours 9 AM to 5 PM everywhere, and all six days fit on the Schedule at laptop width.</li>
           </ul>
           <h3 className="mt-4 text-xs font-medium text-bone">Other changes</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
-            <li>Reviews are no longer checked for the old single-file format on every read, only when the list loads.</li>
-            <li>Round 4: reviews are stored one per document; the new-lead email shows as Important on /admin; a production backup and restore drill is recorded in the README; more tests (86).</li>
-            <li>Round 3: live availability in the booking form, reduced-motion fix, atomic stale-edit check, restore re-holds visit slots.</li>
+            <li>Failure check on a real deployment: with the email key removed, /admin showed New-lead email as down and the visitor still saw the success screen. With a bad storage token, the form showed “We couldn’t save your request. Please call or text us instead.” Both results are saved in docs/evidence.</li>
+            <li>Walkthrough videos of the owner flows (leads, visits, reviews, assistant switch, admin) were recorded on the current build.</li>
           </ul>
         </Card>
 

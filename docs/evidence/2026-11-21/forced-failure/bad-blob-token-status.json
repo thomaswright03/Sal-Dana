@@ -1,0 +1,124 @@
+{
+  "product": "Sal Dana Renovations",
+  "checked_at": "2026-11-21T01:57:06.159Z",
+  "overall": "down",
+  "functions": [
+    {
+      "tier": "important",
+      "name": "Booking form saves a lead",
+      "status": "down",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "Storage is down, so new requests can't be saved."
+    },
+    {
+      "tier": "important",
+      "name": "Assistant books a visit",
+      "status": "down",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "Storage is down, so bookings can't be saved."
+    },
+    {
+      "tier": "important",
+      "name": "New-lead email",
+      "status": "down",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "RESEND_API_KEY is not set: Alan is not told about new leads."
+    },
+    {
+      "tier": "important",
+      "name": "Leads waiting for their email",
+      "status": "unknown",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "None."
+    },
+    {
+      "tier": "key",
+      "name": "Anthropic API",
+      "status": "warning",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "No API key set; the assistant is not switched on."
+    },
+    {
+      "tier": "key",
+      "name": "Retention cron",
+      "status": "unknown",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": "2026-11-23T10:00:00.000Z",
+      "detail": "Hasn't run yet."
+    },
+    {
+      "tier": "key",
+      "name": "Visitor tracking",
+      "status": "down",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "Storage is down."
+    },
+    {
+      "tier": "basic",
+      "name": "Blob storage",
+      "status": "down",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "Read failed: Vercel Blob: This store does not exist."
+    },
+    {
+      "tier": "basic",
+      "name": "CRM sign-in",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": "2026-11-21T01:57:06.159Z",
+      "next_expected_run": null,
+      "detail": ""
+    },
+    {
+      "tier": "basic",
+      "name": "Latest backup",
+      "status": "unknown",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": "2026-11-21T11:00:00.000Z",
+      "detail": "No backup has run yet. 0 snapshot(s) kept."
+    },
+    {
+      "tier": "basic",
+      "name": "Backup in a second store",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": "2026-11-21T01:57:06.159Z",
+      "next_expected_run": null,
+      "detail": ""
+    },
+    {
+      "tier": "basic",
+      "name": "AI kill switch",
+      "status": "unknown",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": null,
+      "next_expected_run": null,
+      "detail": "Can't read the setting while storage is down."
+    },
+    {
+      "tier": "basic",
+      "name": "Deployed version (373da31, preview mode)",
+      "status": "ok",
+      "last_checked": "2026-11-21T01:57:06.159Z",
+      "last_success": "2026-11-21T01:57:06.159Z",
+      "next_expected_run": null,
+      "detail": ""
+    }
+  ]
+}
