@@ -27,7 +27,7 @@ export async function getLead(id: string): Promise<Lead | null> {
 }
 
 export type NewLead = Pick<Lead, "name" | "phone" | "source"> &
-  Partial<Omit<Lead, "id" | "createdAt" | "updatedAt" | "notes">> & { note?: string };
+  Partial<Omit<Lead, "id" | "createdAt" | "updatedAt" | "notes">> & { note?: string; id?: string };
 
 export function makeNote(text: string): Note {
   return { id: randomUUID(), at: new Date().toISOString(), text };
@@ -36,7 +36,7 @@ export function makeNote(text: string): Note {
 export async function createLead(input: NewLead): Promise<Lead> {
   const now = new Date().toISOString();
   const lead: Lead = {
-    id: randomUUID(),
+    id: input.id ?? randomUUID(),
     createdAt: now,
     updatedAt: now,
     name: input.name,
@@ -57,13 +57,29 @@ export async function createLead(input: NewLead): Promise<Lead> {
   return lead;
 }
 
+/** The lead changed after the caller loaded it. */
+export class ConflictError extends Error {
+  constructor() {
+    super("This lead changed since you opened it.");
+    this.name = "ConflictError";
+  }
+}
+
 export async function updateLead(
   id: string,
-  patch: Partial<Omit<Lead, "id" | "createdAt" | "notes">> & { addNote?: string; removeNoteId?: string },
+  patch: Partial<Omit<Lead, "id" | "createdAt" | "notes">> & {
+    addNote?: string;
+    removeNoteId?: string;
+    /** The `updatedAt` the editor last saw. If the stored lead is newer, the save is refused. */
+    expectedUpdatedAt?: string;
+  },
 ): Promise<Lead | null> {
   const current = await getLead(id);
   if (!current) return null;
-  const { addNote, removeNoteId, ...fields } = patch;
+  if (patch.expectedUpdatedAt && patch.expectedUpdatedAt !== current.updatedAt) throw new ConflictError();
+  const { addNote, removeNoteId, ...rest } = patch;
+  const { expectedUpdatedAt, ...fields } = rest;
+  void expectedUpdatedAt;
   let notes = current.notes;
   if (removeNoteId) notes = notes.filter((n) => n.id !== removeNoteId);
   if (addNote) notes = [makeNote(addNote), ...notes];

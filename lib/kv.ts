@@ -70,6 +70,69 @@ export async function writeJson(key: string, value: unknown): Promise<void> {
   await fs.writeFile(file, JSON.stringify(value, null, 2));
 }
 
+/** Writes only if the key doesn't exist yet. Returns false when someone else got there first. */
+export async function writeJsonIfAbsent(key: string, value: unknown): Promise<boolean> {
+  check(key);
+  if (backend() === "blob") {
+    try {
+      await put(key, JSON.stringify(value), {
+        access: "private",
+        contentType: "application/json",
+        addRandomSuffix: false,
+        allowOverwrite: false,
+      });
+      return true;
+    } catch (err) {
+      if (err instanceof Error && /already exists/i.test(err.message)) return false;
+      throw err;
+    }
+  }
+  const file = path.join(DATA_DIR, key);
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  try {
+    await fs.writeFile(file, JSON.stringify(value, null, 2), { flag: "wx" });
+    return true;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "EEXIST") return false;
+    throw err;
+  }
+}
+
+/** Writes a document to a second Blob store (token from BACKUP_BLOB_READ_WRITE_TOKEN). */
+export async function writeJsonTo(token: string, key: string, value: unknown): Promise<void> {
+  check(key);
+  await put(key, JSON.stringify(value), {
+    access: "private",
+    contentType: "application/json",
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    token,
+  });
+}
+
+export async function readJsonFrom<T>(token: string, key: string): Promise<T | null> {
+  check(key);
+  const res = await get(key, { access: "private", useCache: false, token });
+  if (!res || !res.stream) return null;
+  return JSON.parse(await new Response(res.stream).text()) as T;
+}
+
+export async function removeJsonFrom(token: string, key: string): Promise<void> {
+  check(key);
+  await del(key, { token });
+}
+
+export async function listKeysFrom(token: string, prefix: string): Promise<string[]> {
+  const keys: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await list({ prefix, cursor, limit: 1000, token });
+    keys.push(...page.blobs.map((b) => b.pathname));
+    cursor = page.hasMore ? page.cursor : undefined;
+  } while (cursor);
+  return keys;
+}
+
 export async function removeJson(key: string): Promise<void> {
   check(key);
   if (backend() === "blob") {
@@ -91,8 +154,12 @@ export async function listKeys(prefix: string): Promise<string[]> {
     } while (cursor);
     return keys;
   }
-  const files = await fs.readdir(path.join(DATA_DIR, prefix)).catch(() => [] as string[]);
-  return files.filter((f) => f.endsWith(".json")).map((f) => `${prefix}${f}`);
+  // The prefix may end mid-name ("slots/2026-11-25_"), like a Blob prefix.
+  const cut = prefix.lastIndexOf("/") + 1;
+  const dir = prefix.slice(0, cut);
+  const namePrefix = prefix.slice(cut);
+  const files = await fs.readdir(path.join(DATA_DIR, dir)).catch(() => [] as string[]);
+  return files.filter((f) => f.endsWith(".json") && f.startsWith(namePrefix)).map((f) => `${dir}${f}`);
 }
 
 /** Reads many documents, a few at a time, skipping any that fail to load. */

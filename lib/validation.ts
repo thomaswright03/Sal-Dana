@@ -43,6 +43,8 @@ export const crmCreateSchema = z.object({
   status: z.enum(LEAD_STATUSES).default("new"),
   value: z.number().int().min(0).max(10_000_000).nullable().default(null),
   appointment: appointmentSchema.nullable().default(null),
+  /** The owner saw the "window already booked" warning and wants it anyway. */
+  confirmDoubleBook: z.boolean().optional(),
 });
 
 /** CRM: edit a lead. */
@@ -59,6 +61,8 @@ export const crmPatchSchema = z
     appointment: appointmentSchema.nullable(),
     addNote: text(2000).min(1),
     removeNoteId: z.string().max(64),
+    expectedUpdatedAt: z.string().max(40),
+    confirmDoubleBook: z.boolean(),
   })
   .partial();
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { runTool, systemPrompt, tools } from "@/lib/assistant";
 import { streamAssistant, type StreamText } from "@/lib/assistant-stream";
 import type { Locale } from "@/lib/i18n";
+import { aiAvailable } from "@/lib/settings";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { site } from "@/lib/site";
 
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
   if (!rateLimit(`chat:${ip}`, 30, 10 * 60 * 1000)) {
     return Response.json({ error: text.tooFast }, { status: 429 });
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!(await aiAvailable())) {
     return Response.json({ error: text.offline }, { status: 503 });
   }
 

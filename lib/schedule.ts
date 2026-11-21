@@ -29,18 +29,23 @@ export function formatDate(date: string, locale: Locale = "en"): string {
 
 export type DayCheck = { ok: true; open: WindowId[] } | { ok: false; reason: string };
 
-/** Which visit windows are still open on a given day. */
-export function checkDay(date: string, leads: Lead[]): DayCheck {
-  if (!isValidDate(date)) return { ok: false, reason: "That isn't a valid date. Use YYYY-MM-DD." };
+/** Why a date can't take a visit request, or null if it can. */
+export function dateProblem(date: string): string | null {
+  if (!isValidDate(date)) return "That isn't a valid date. Use YYYY-MM-DD.";
   const today = todayInPhoenix();
-  if (date <= today) return { ok: false, reason: "Visits can be requested from tomorrow onward." };
+  if (date <= today) return "Visits can be requested from tomorrow onward.";
   const max = new Date(`${today}T12:00:00Z`);
   max.setUTCDate(max.getUTCDate() + 90);
-  if (date > max.toISOString().slice(0, 10))
-    return { ok: false, reason: "Visits can be requested up to 90 days ahead." };
+  if (date > max.toISOString().slice(0, 10)) return "Visits can be requested up to 90 days ahead.";
   if (!(site.workingDays as readonly number[]).includes(weekday(date)))
-    return { ok: false, reason: `Alan works ${site.hoursDisplay}. Pick another day.` };
+    return `Alan works ${site.hoursDisplay}. Pick another day.`;
+  return null;
+}
 
+/** Which visit windows are still open on a given day, from a list of leads (pure; used by tests). */
+export function checkDay(date: string, leads: Lead[]): DayCheck {
+  const reason = dateProblem(date);
+  if (reason) return { ok: false, reason };
   const taken = new Set(
     leads
       .filter((l) => l.appointment && l.appointment.date === date && l.appointment.status !== "cancelled")

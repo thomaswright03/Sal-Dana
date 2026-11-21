@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { site } from "@/lib/site";
 import { useCrm } from "./context";
 import { num } from "./data";
@@ -58,7 +58,25 @@ const Code = ({ children }: { children: ReactNode }) => (
 );
 
 export function SettingsView() {
-  const { status, leads, reviews, traffic, sampleCount, sampleBusy, samples, exportCsv, signOut } = useCrm();
+  const { notify, status, leads, reviews, traffic, sampleCount, sampleBusy, samples, exportCsv, signOut } = useCrm();
+  const [aiOverride, setAiOverride] = useState<boolean | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
+  const aiOn = aiOverride ?? status?.aiEnabled ?? true;
+  async function toggleAi() {
+    setAiBusy(true);
+    const res = await fetch("/api/crm/settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ aiEnabled: !aiOn }),
+    }).catch(() => null);
+    if (res?.ok) {
+      setAiOverride(!aiOn);
+      notify(!aiOn ? "Assistant is on." : "Assistant is off.");
+    } else {
+      notify("Couldn't change the assistant setting.");
+    }
+    setAiBusy(false);
+  }
   const sampleLeads = leads.filter((l) => l.demo).length;
   const sampleReviews = reviews.filter((r) => r.demo).length;
   const sampleDays = traffic.filter((d) => d.demo).length;
@@ -115,6 +133,24 @@ export function SettingsView() {
               }
             >
               Leads, reviews and visit counts are kept in a private store that only this dashboard can read.
+            </Row>
+            <Row
+              icon="ask"
+              title="Assistant on/off"
+              aside={
+                <button
+                  type="button"
+                  disabled={!status || !status.ai || aiBusy}
+                  onClick={() => void toggleAi()}
+                  className={btn.ghost}
+                >
+                  {aiBusy ? "Saving…" : aiOn ? "Turn off" : "Turn on"}
+                </button>
+              }
+            >
+              {aiOn
+                ? "The website chat and Ask AI are allowed to answer. Turning this off stops both on the next request, with no redeploy; the chat then tells visitors to call or text."
+                : "The assistant is switched off. The website chat tells visitors to call or text, and Ask AI is off. Turn it on to resume."}
             </Row>
             <Row
               icon="ask"
@@ -209,19 +245,21 @@ export function SettingsView() {
 
         <Card className="p-5 sm:p-6" index={4}>
           <h2 className="text-[0.9375rem] font-medium text-bone">Latest update</h2>
-          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Legal round 2.</p>
+          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Reliability round.</p>
           <h3 className="mt-4 text-xs font-medium text-bone">Frontend changes (website)</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
-            <li>Removed unconfirmed claims (“no subcontracted surprises”, “on site when he says he will be”) in English and Spanish; hours now read “typically”, confirmed when booking.</li>
-            <li>The booking form now links the Terms beside the Privacy policy.</li>
-            <li>Terms: 18+ line, how to report or remove a review, visitor indemnity, and bold disclaimer and liability limit.</li>
-            <li>Earlier (round 1): Privacy and Terms pages, chat notice about Anthropic, “registered LLC” claims removed, reviews labelled as selected.</li>
+            <li>Branded “page not found” and error pages in English and Spanish, with Home, Call and Text (and Try again on errors). Same for the dashboard.</li>
+            <li>Home-screen icon for phones.</li>
+            <li>If someone books a time that was just taken, they are told it’s unavailable and Alan still gets their request.</li>
           </ul>
-          <h3 className="mt-4 text-xs font-medium text-bone">Other changes (dashboard and assistant)</h3>
+          <h3 className="mt-4 text-xs font-medium text-bone">Other changes (dashboard and behind the scenes)</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
-            <li>Assistant no longer says who does the work or that anyone arrives at a set time; hours are described as typical.</li>
-            <li>Weekly retention job now has its secret set, so old leads (24 months) and chat transcripts (12 months) are deleted.</li>
-            <li>Earlier (round 1): reviews need a permission note; assistant declines DIY, legal and financial advice; Ask AI skips phone and email search.</li>
+            <li>Alan gets an email for every new lead, with name, phone, service, requested time and a link to the lead.</li>
+            <li>Assistant on/off switch in Settings; it stops the chat and Ask AI right away.</li>
+            <li>Two people can no longer book the same time slot; two tabs editing one lead now warn instead of overwriting.</li>
+            <li>Daily backup of leads and reviews, with a restore; failed background jobs email an alert.</li>
+            <li>Private status page at /admin for the site’s health. Deleting a review now confirms inline.</li>
+            <li>Assistant uses a cheaper model, shorter replies and prompt caching.</li>
           </ul>
         </Card>
 
