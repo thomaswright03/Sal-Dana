@@ -53,6 +53,7 @@ export function Stars({ rating, className = "h-3.5 w-3.5" }: { rating: number; c
 export function ReviewsView() {
   const { reviews, setReviews, leads, notify, openLead } = useCrm();
   const [filter, setFilter] = useState<"all" | "shown" | "hidden">("all");
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Review | "new" | null>(null);
   const [link, setLink] = useState(() => {
     try {
@@ -136,7 +137,7 @@ export function ReviewsView() {
   }
 
   async function remove(r: Review) {
-    if (!window.confirm(`Delete the review from ${r.name}? This can't be undone.`)) return;
+    setConfirmId(null);
     const before = reviews;
     setReviews((rs) => rs.filter((x) => x.id !== r.id));
     const res = await fetch(`/api/crm/reviews/${r.id}`, { method: "DELETE" }).catch(() => null);
@@ -282,13 +283,33 @@ export function ReviewsView() {
                       >
                         <Icon name="edit" className="h-3.5 w-3.5" /> Edit
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => void remove(r)}
-                        className="flex h-8 items-center gap-2 rounded-full px-3 text-xs text-dust transition-colors hover:bg-rose-400/10 hover:text-rose-200"
-                      >
-                        <Icon name="trash" className="h-3.5 w-3.5" /> Delete
-                      </button>
+                      {confirmId === r.id ? (
+                        <span className="flex items-center gap-2 text-xs">
+                          <span className="text-sand">Delete for good?</span>
+                          <button
+                            type="button"
+                            onClick={() => void remove(r)}
+                            className="rounded-full bg-red-500/90 px-3.5 py-1.5 font-medium text-white"
+                          >
+                            Delete
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmId(null)}
+                            className="rounded-full border border-line px-3.5 py-1.5 text-sand"
+                          >
+                            Keep
+                          </button>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmId(r.id)}
+                          className="flex h-8 items-center gap-2 rounded-full px-3 text-xs text-dust transition-colors hover:bg-rose-400/10 hover:text-rose-200"
+                        >
+                          <Icon name="trash" className="h-3.5 w-3.5" /> Delete
+                        </button>
+                      )}
                     </span>
                   </div>
                 </motion.li>

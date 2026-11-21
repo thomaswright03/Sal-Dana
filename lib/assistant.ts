@@ -5,7 +5,8 @@ import { z } from "zod";
 import type { Locale } from "./i18n";
 import { checkDay, formatDate, todayInPhoenix, windowLabel } from "./schedule";
 import { services, site, windows } from "./site";
-import { createLead, listLeads } from "./store";
+import { createPublicLead } from "./booking";
+import { listLeads } from "./store";
 import { dateSchema, phoneSchema, windowSchema } from "./validation";
 
 export { assistantModel, DEFAULT_MODEL } from "./assistant-stream";
@@ -178,18 +179,27 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext): P
           content: `Too many requests from this visitor. Ask them to call or text ${site.phoneDisplay} instead.`,
           isError: true,
         };
-      await createLead({
-        name: d.name,
-        phone: d.phone,
-        email: d.email ?? "",
-        address: d.address ?? "",
-        service: d.service,
-        details: d.details,
-        source: "ai-assistant",
-        appointment: { date: d.date, window: d.window, status: "requested" },
-        transcript: ctx.transcript,
-        language: d.language ?? ctx.locale,
-      });
+      const result = await createPublicLead(
+        {
+          name: d.name,
+          phone: d.phone,
+          email: d.email ?? "",
+          address: d.address ?? "",
+          service: d.service,
+          details: d.details,
+          source: "ai-assistant",
+          transcript: ctx.transcript,
+          language: d.language ?? ctx.locale,
+        },
+        { date: d.date, window: d.window, status: "requested" },
+        "reject",
+      );
+      if (!result.ok) {
+        return {
+          content: `That window was just taken by someone else. Check availability for ${formatDate(d.date)} again and offer another.`,
+          isError: true,
+        };
+      }
       return {
         content: `Saved. Visit requested for ${formatDate(d.date)}, ${windowLabel(d.window)}. Alan will confirm by call or text.`,
         event: {
@@ -210,17 +220,20 @@ export async function runTool(name: string, input: unknown, ctx: ToolContext): P
           content: `Too many requests from this visitor. Ask them to call or text ${site.phoneDisplay} instead.`,
           isError: true,
         };
-      await createLead({
-        name: d.name,
-        phone: d.phone,
-        email: d.email ?? "",
-        service: d.service ?? "",
-        details: d.details,
-        source: "ai-assistant",
-        note: "Asked for a call back.",
-        transcript: ctx.transcript,
-        language: d.language ?? ctx.locale,
-      });
+      await createPublicLead(
+        {
+          name: d.name,
+          phone: d.phone,
+          email: d.email ?? "",
+          service: d.service ?? "",
+          details: d.details,
+          source: "ai-assistant",
+          note: "Asked for a call back.",
+          transcript: ctx.transcript,
+          language: d.language ?? ctx.locale,
+        },
+        null,
+      );
       return { content: "Saved. Alan will call or text them back.", event: { type: "callback" } };
     }
 

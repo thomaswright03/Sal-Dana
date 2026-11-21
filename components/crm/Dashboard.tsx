@@ -54,6 +54,7 @@ export function Dashboard() {
   const [selected, setSelected] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [conflict, setConflict] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [menu, setMenu] = useState<"alerts" | "account" | null>(null);
   const [sampleBusy, setSampleBusy] = useState(false);
@@ -64,6 +65,9 @@ export function Dashboard() {
     setToast(message);
     setTimeout(() => setToast((t) => (t === message ? null : t)), 3500);
   }, []);
+
+  // Links from the new-lead email (?lead=ID) open that lead once, on first load.
+  const linkedLead = useRef(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -80,6 +84,11 @@ export function Dashboard() {
       }
       setLeads(data.leads ?? []);
       setLoad({ kind: "ready" });
+      if (!linkedLead.current) {
+        linkedLead.current = true;
+        const id = new URLSearchParams(window.location.search).get("lead");
+        if (id && data.leads?.some((l) => l.id === id)) setSelected(id);
+      }
     } catch {
       setLoad({ kind: "error", message: "Couldn't reach the server.", storage: false });
     }
@@ -129,6 +138,7 @@ export function Dashboard() {
   const patchLead = useCallback(
     async (id: string, body: Record<string, unknown>) => {
       const before = leads;
+      const seen = leads.find((l) => l.id === id)?.updatedAt;
       // Show simple field edits immediately; the server's copy replaces it on reply.
       setLeads((ls) =>
         ls.map((l) => {
@@ -144,9 +154,14 @@ export function Dashboard() {
         const res = await fetch(`/api/crm/leads/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
+          body: JSON.stringify({ ...body, expectedUpdatedAt: seen }),
         });
         if (res.status === 401) return router.replace("/crm/login");
+        if (res.status === 409) {
+          setLeads(before);
+          setConflict(true);
+          return;
+        }
         const data = (await res.json()) as { lead?: Lead; error?: string };
         if (!res.ok || !data.lead) throw new Error(data.error ?? "Couldn't save.");
         setLeads((ls) => ls.map((l) => (l.id === id ? data.lead! : l)));
@@ -628,6 +643,25 @@ export function Dashboard() {
           onCreate={create}
           onDelete={remove}
         />
+
+        {conflict && (
+          <div
+            role="alert"
+            className="fixed bottom-20 left-1/2 z-[70] flex -translate-x-1/2 items-center gap-3 rounded-full border border-brass/40 bg-coal px-5 py-3 text-sm shadow-2xl"
+          >
+            <span>This lead changed since you opened it.</span>
+            <button
+              type="button"
+              onClick={() => {
+                setConflict(false);
+                void refresh();
+              }}
+              className="rounded-full bg-brass px-3.5 py-1.5 text-xs font-medium text-ink"
+            >
+              Reload
+            </button>
+          </div>
+        )}
 
         <AnimatePresence>
           {toast && (

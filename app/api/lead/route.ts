@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { checkDay } from "@/lib/schedule";
-import { createLead, listLeads, StorageNotConfiguredError } from "@/lib/store";
+import { createPublicLead } from "@/lib/booking";
+import { listLeads, StorageNotConfiguredError } from "@/lib/store";
 import { publicLeadSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
@@ -38,19 +39,26 @@ export async function POST(req: Request) {
       note = `Preferred date: ${data.date}`;
     }
 
-    await createLead({
-      name: data.name,
-      phone: data.phone,
-      email: data.email,
-      address: data.address,
-      service: data.service,
-      details: data.details,
-      source: "website-form",
-      language: data.language,
+    const result = await createPublicLead(
+      {
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        address: data.address,
+        service: data.service,
+        details: data.details,
+        source: "website-form",
+        language: data.language,
+        note,
+      },
       appointment,
-      note,
-    });
-    return NextResponse.json({ ok: true, booked: Boolean(appointment) });
+      "save-without-visit",
+      data.date && data.window
+        ? `Asked for ${data.date} (${data.window}), which was just taken. Offer another time.`
+        : undefined,
+    );
+    if (!result.ok) throw new Error("unreachable");
+    return NextResponse.json({ ok: true, booked: result.booked });
   } catch (err) {
     if (!(err instanceof StorageNotConfiguredError)) console.error("lead form failed", err);
     return NextResponse.json(

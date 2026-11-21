@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireOwner, storageError } from "@/lib/crm-guard";
-import { deleteLead, updateLead } from "@/lib/store";
+import { ConflictError, deleteLead, updateLead } from "@/lib/store";
 import { crmPatchSchema } from "@/lib/validation";
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -16,6 +16,9 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     return NextResponse.json({ lead });
   } catch (err) {
+    if (err instanceof ConflictError) {
+      return NextResponse.json({ error: err.message, code: "conflict" }, { status: 409 });
+    }
     return storageError(err);
   }
 }

@@ -70,6 +70,53 @@ export async function writeJson(key: string, value: unknown): Promise<void> {
   await fs.writeFile(file, JSON.stringify(value, null, 2));
 }
 
+/** Writes only if the key doesn't exist yet. Returns false when someone else got there first. */
+export async function writeJsonIfAbsent(key: string, value: unknown): Promise<boolean> {
+  check(key);
+  if (backend() === "blob") {
+    try {
+      await put(key, JSON.stringify(value), {
+        access: "private",
+        contentType: "application/json",
+        addRandomSuffix: false,
+        allowOverwrite: false,
+      });
+      return true;
+    } catch (err) {
+      if (err instanceof Error && /already exists/i.test(err.message)) return false;
+      throw err;
+    }
+  }
+  const file = path.join(DATA_DIR, key);
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  try {
+    await fs.writeFile(file, JSON.stringify(value, null, 2), { flag: "wx" });
+    return true;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "EEXIST") return false;
+    throw err;
+  }
+}
+
+/** Writes a document to a second Blob store (token from BACKUP_BLOB_READ_WRITE_TOKEN). */
+export async function writeJsonTo(token: string, key: string, value: unknown): Promise<void> {
+  check(key);
+  await put(key, JSON.stringify(value), {
+    access: "private",
+    contentType: "application/json",
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    token,
+  });
+}
+
+export async function readJsonFrom<T>(token: string, key: string): Promise<T | null> {
+  check(key);
+  const res = await get(key, { access: "private", useCache: false, token });
+  if (!res || !res.stream) return null;
+  return JSON.parse(await new Response(res.stream).text()) as T;
+}
+
 export async function removeJson(key: string): Promise<void> {
   check(key);
   if (backend() === "blob") {

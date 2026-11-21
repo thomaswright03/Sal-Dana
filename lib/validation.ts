@@ -59,6 +59,7 @@ export const crmPatchSchema = z
     appointment: appointmentSchema.nullable(),
     addNote: text(2000).min(1),
     removeNoteId: z.string().max(64),
+    expectedUpdatedAt: z.string().max(40),
   })
   .partial();
 

@@ -1,7 +1,9 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import { recordOps } from "./ops";
 
-export const DEFAULT_MODEL = "claude-fable-5-2";
+/** Mid-priced model for chat: books reliably at a fraction of the frontier model's cost. Override with ANTHROPIC_MODEL; `npm run eval` checks any model. */
+export const DEFAULT_MODEL = "claude-sonnet-5-5";
 
 /** Models that accept the server-side refusal fallback parameter. */
 const FALLBACK_MODELS = new Set([
@@ -59,6 +61,8 @@ export interface StreamOptions {
   runTool: (name: string, input: unknown) => Promise<ToolOutcome>;
   text: StreamText;
   effort?: "low" | "medium";
+  /** Reply cap per model turn. Chat replies are short; Ask AI passes more. */
+  maxTokens?: number;
   maxTurns?: number;
 }
 
@@ -82,9 +86,12 @@ export function streamAssistant(opts: StreamOptions): Response {
           const stream = client.beta.messages.stream(
             {
               model,
-              max_tokens: 8000,
-              system: opts.system,
-              tools: opts.tools,
+              max_tokens: opts.maxTokens ?? 1000,
+              // The system prompt and tool list are the same on every turn: cache them.
+              system: [{ type: "text", text: opts.system, cache_control: { type: "ephemeral" } }],
+              tools: opts.tools.map((t, i, all) =>
+                i === all.length - 1 ? { ...t, cache_control: { type: "ephemeral" as const } } : t,
+              ),
               messages,
               output_config: { effort: opts.effort ?? "low" },
               // If the model declines a request for policy reasons, let the API
@@ -97,6 +104,11 @@ export function streamAssistant(opts: StreamOptions): Response {
           );
           stream.on("text", (delta) => send({ type: "text", delta }));
           const message = await stream.finalMessage();
+          const u = message.usage;
+          console.log(
+            `${opts.label}: usage model=${model} in=${u.input_tokens} out=${u.output_tokens} cache_read=${u.cache_read_input_tokens ?? 0} cache_write=${u.cache_creation_input_tokens ?? 0}`,
+          );
+          await recordOps("anthropic", true, `Last call used ${u.input_tokens} in / ${u.output_tokens} out tokens`);
 
           if (message.stop_reason === "refusal") {
             send({ type: "text", delta: opts.text.refusal });
@@ -139,6 +151,7 @@ export function streamAssistant(opts: StreamOptions): Response {
           send({ type: "error", message: opts.text.busy });
         } else if (err instanceof Anthropic.APIError) {
           console.error(`${opts.label}: API error`, err.status, err.message);
+          await recordOps("anthropic", false, `API error ${err.status}`);
           send({ type: "error", message: opts.text.failed });
         } else {
           console.error(`${opts.label}: unexpected error`, err);

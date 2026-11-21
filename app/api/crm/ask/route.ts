@@ -3,6 +3,7 @@ import { z } from "zod";
 import { analystPrompt, analystTools, runAnalystTool } from "@/lib/analyst";
 import { streamAssistant } from "@/lib/assistant-stream";
 import { requireOwner } from "@/lib/crm-guard";
+import { aiAvailable } from "@/lib/settings";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 120;
@@ -20,7 +21,7 @@ const bodySchema = z.object({
 });
 
 const NOT_CONNECTED =
-  "The data assistant isn't connected yet. Add an Anthropic API key to the site's settings on Vercel (ANTHROPIC_API_KEY), redeploy, and it will start answering.";
+  "The data assistant is off. Either no Anthropic API key is set (ANTHROPIC_API_KEY on Vercel) or it was switched off in Settings.";
 
 /** The owner's data assistant. Read-only: it looks records up and never changes them. */
 export async function POST(req: Request) {
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
       { status: 429 },
     );
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!(await aiAvailable())) {
     return Response.json({ error: NOT_CONNECTED, code: "not_connected" }, { status: 503 });
   }
 
@@ -55,6 +56,7 @@ export async function POST(req: Request) {
     runTool: runAnalystTool,
     effort: "medium",
     maxTurns: 8,
+    maxTokens: 4000,
     text: {
       refusal:
         "I can't help with that one. Ask me about your leads, visits, revenue, website traffic or reviews.",

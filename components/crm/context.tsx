@@ -6,6 +6,7 @@ import type { Range } from "./data";
 
 export interface Status {
   ai: boolean;
+  aiEnabled?: boolean;
   model: string;
   storage: boolean;
   previewMode: boolean;
