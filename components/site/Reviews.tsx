@@ -42,7 +42,7 @@ function Card({ review }: { review: PublicReview }) {
               <Star key={i} className={`h-3.5 w-3.5 ${i <= review.rating ? "text-brass" : "text-bone/15"}`} />
             ))}
           </div>
-          <span className="font-mono text-[0.625rem] uppercase tracking-[0.18em] text-dust">
+          <span className="font-mono text-micro uppercase tracking-[0.18em] text-dust">
             {monthYear(review.date, locale)}
           </span>
         </div>
@@ -112,7 +112,7 @@ export function Reviews({ reviews }: { reviews: PublicReview[] }) {
               <span className="h-px w-8 bg-brass" />
               {t.reviews.eyebrow}
               {sample && (
-                <span className="rounded-full border border-brass/40 px-2.5 py-1 text-[0.5625rem] tracking-[0.18em] text-brass">
+                <span className="rounded-full border border-brass/40 px-2.5 py-1 text-micro tracking-[0.18em] text-brass">
                   {t.reviews.sample}
                 </span>
               )}

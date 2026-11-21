@@ -375,7 +375,7 @@ export function Dashboard() {
                   {!collapsed && <span className="relative flex-1 font-medium">{n.label}</span>}
                   {!collapsed && n.href === "/crm/leads" && newCount > 0 && (
                     <span
-                      className={`relative rounded-full px-2 py-0.5 text-[0.625rem] font-semibold tabular-nums ${active ? "bg-ink/15" : "bg-brass text-ink"}`}
+                      className={`relative rounded-full px-2 py-0.5 text-micro font-semibold tabular-nums ${active ? "bg-ink/15" : "bg-brass text-ink"}`}
                       title={`${newCount} new`}
                     >
                       {newCount}
@@ -535,7 +535,7 @@ export function Dashboard() {
                 key={n.href}
                 href={n.href}
                 aria-current={n === current ? "page" : undefined}
-                className={`flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[0.8125rem] ${
+                className={`flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-small ${
                   n === current ? "bg-brass font-medium text-ink" : "text-sand"
                 }`}
               >
@@ -564,7 +564,7 @@ export function Dashboard() {
                   <Icon name="ask" className="h-3.5 w-3.5" />
                 </span>
                 <span>
-                  <span className="mr-2 rounded-full bg-brass px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-ink">
+                  <span className="mr-2 rounded-full bg-brass px-2 py-0.5 text-micro font-semibold uppercase tracking-[0.14em] text-ink">
                     Preview
                   </span>
                   Sample leads, reviews and visits are loaded, so the numbers here aren’t real customers.

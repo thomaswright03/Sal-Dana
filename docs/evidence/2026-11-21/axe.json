@@ -1,0 +1,18 @@
+[
+  {
+    "page": "/crm/leads",
+    "violations": []
+  },
+  {
+    "page": "/",
+    "violations": []
+  },
+  {
+    "page": "/es",
+    "violations": []
+  },
+  {
+    "page": "/admin",
+    "violations": []
+  }
+]

@@ -192,7 +192,7 @@ export function Plot({
                 x={pad.l - 8}
                 y={yAt(top * f) + 3.5}
                 textAnchor="end"
-                className="fill-dust text-[10px] tabular-nums"
+                className="fill-dust text-micro tabular-nums"
               >
                 {axisNumber(top * f, top)}
               </text>
@@ -207,7 +207,7 @@ export function Plot({
                 textAnchor={
                   i === 0 && kind === "line" ? "start" : i === n - 1 && kind === "line" ? "end" : "middle"
                 }
-                className="fill-dust text-[10px]"
+                className="fill-dust text-micro"
               >
                 {t}
               </text>
@@ -308,7 +308,7 @@ export function BarList({
       {shown.map((it, i) => (
         <li
           key={it.label}
-          className="group grid grid-cols-[minmax(0,7.5rem)_1fr_auto] items-center gap-3 text-[0.8125rem]"
+          className="group grid grid-cols-[minmax(0,7.5rem)_1fr_auto] items-center gap-3 text-small"
           title={`${it.label}: ${format(it.value)}${it.note ? ` (${it.note})` : ""}`}
         >
           <span className="truncate text-sand transition-colors group-hover:text-bone">{it.label}</span>
@@ -322,7 +322,7 @@ export function BarList({
             />
           </span>
           <span className="flex items-baseline gap-2 tabular-nums text-bone">
-            {it.note && <span className="text-[0.6875rem] text-dust">{it.note}</span>}
+            {it.note && <span className="text-micro text-dust">{it.note}</span>}
             {format(it.value)}
           </span>
         </li>
@@ -341,14 +341,14 @@ export function Funnel({ stages }: { stages: { label: string; value: number }[] 
         const kept = i > 0 && prev > 0 ? Math.round((s.value / prev) * 100) : null;
         return (
           <li key={s.label}>
-            <div className="mb-1.5 flex items-baseline justify-between gap-3 text-[0.8125rem]">
+            <div className="mb-1.5 flex items-baseline justify-between gap-3 text-small">
               <span className="flex items-baseline gap-2 text-sand">
-                <span className="font-mono text-[0.625rem] text-dust">{String(i + 1).padStart(2, "0")}</span>
+                <span className="font-mono text-micro text-dust">{String(i + 1).padStart(2, "0")}</span>
                 {s.label}
               </span>
               <span className="flex items-baseline gap-2.5 tabular-nums">
                 {kept !== null && (
-                  <span className="text-[0.6875rem] text-dust">{kept}% of the step before</span>
+                  <span className="text-micro text-dust">{kept}% of the step before</span>
                 )}
                 <span className="font-semibold text-bone">{num(s.value)}</span>
               </span>
@@ -395,7 +395,7 @@ export function SplitBar({ parts }: { parts: { label: string; value: number; col
           ))}
         {total === 0 && <span className="h-2 flex-1 bg-bone/[0.06]" />}
       </div>
-      <ul className="mt-4 space-y-2 text-[0.8125rem]">
+      <ul className="mt-4 space-y-2 text-small">
         {parts.map((p) => (
           <li key={p.label} className="flex items-center justify-between gap-3">
             <span className="flex items-center gap-2 text-sand">
@@ -404,7 +404,7 @@ export function SplitBar({ parts }: { parts: { label: string; value: number; col
             </span>
             <span className="tabular-nums text-bone">
               {num(p.value)}
-              <span className="ml-2 inline-block w-9 text-right text-[0.6875rem] text-dust">
+              <span className="ml-2 inline-block w-9 text-right text-micro text-dust">
                 {share(p.value)}%
               </span>
             </span>

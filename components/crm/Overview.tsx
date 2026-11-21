@@ -331,7 +331,7 @@ export function Overview() {
           table={{ head: ["Stage", "People"], rows: m.funnel.map((s) => [s.label, s.value]) }}
         >
           <Funnel stages={m.funnel} />
-          <p className="mt-5 flex items-center justify-between border-t border-line pt-4 text-[0.8125rem] text-sand">
+          <p className="mt-5 flex items-center justify-between border-t border-line pt-4 text-small text-sand">
             Visitor to job
             <span className="rounded-full border border-line px-2.5 py-1 text-xs font-semibold tabular-nums text-bone">
               {m.now.visitors ? pct((m.funnel[4].value / m.now.visitors) * 100, 2) : "–"}
@@ -407,7 +407,7 @@ export function Overview() {
         <Card className="flex flex-col p-5 sm:p-6">
           <header className="mb-4 flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-[0.9375rem] font-medium">Activity</h2>
+              <h2 className="text-body font-medium">Activity</h2>
               <p className="mt-1 text-xs text-dust">The latest across requests, notes and jobs.</p>
             </div>
             <Link
@@ -435,7 +435,7 @@ export function Overview() {
                     <span className="block truncate text-sm text-bone">{f.title}</span>
                     <span className="block truncate text-xs text-dust">{f.sub || "No details"}</span>
                   </span>
-                  <span className="shrink-0 pt-0.5 text-[0.6875rem] text-dust">{ago(f.at)}</span>
+                  <span className="shrink-0 pt-0.5 text-micro text-dust">{ago(f.at)}</span>
                 </button>
               </li>
             ))}
@@ -446,7 +446,7 @@ export function Overview() {
       <Card className="mt-3 p-5 sm:p-6">
         <header className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-[0.9375rem] font-medium">
+            <h2 className="text-body font-medium">
               Today ·{" "}
               {new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: "America/Phoenix" }).format(
                 new Date(),
@@ -500,7 +500,7 @@ export function Overview() {
         </ul>
       </Card>
 
-      <p className="mt-8 text-center text-[0.6875rem] text-dust">
+      <p className="mt-8 text-center text-micro text-dust">
         Visits are anonymous daily totals. Dollar figures are the estimates entered on each lead. Arrived
         dates use Arizona time ({dayOf(new Date().toISOString())}).
       </p>

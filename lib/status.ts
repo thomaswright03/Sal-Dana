@@ -164,8 +164,8 @@ export async function getStatus(now = new Date()): Promise<StatusReport> {
   const version = item("version", `Deployed version${commit ? ` (${commit}${DEMO_MODE ? ", preview mode" : ""})` : ""}`, commit || deployedAt ? "ok" : "unknown", `${commit ?? "unknown commit"}${DEMO_MODE ? " (preview mode)" : ""}, deployed ${deployedAt ?? "unknown"}.`);
 
   const tiers: [Tier, StatusItem[]][] = [
-    ["important", [form, assistant]],
-    ["key", [anthropic, retention, tracking, notifyItem, waiting]],
+    ["important", [form, assistant, notifyItem, waiting]],
+    ["key", [anthropic, retention, tracking]],
     ["basic", [storage, crm, backup, secondStore, kill, version]],
   ];
   const functions: StatusReport["functions"] = tiers.flatMap(([tier, items]) =>

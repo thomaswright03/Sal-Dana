@@ -161,7 +161,7 @@ function Panel({ lead, onClose, onPatch, onCreate, onDelete }: PanelProps) {
               {lead ? draft.name || lead.name : "Add a lead"}
             </h2>
             {lead?.language === "es" && (
-              <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-brass/40 bg-brass/10 px-3 py-1 text-[0.6875rem] text-brass">
+              <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-brass/40 bg-brass/10 px-3 py-1 text-micro text-brass">
                 Prefers Spanish · used the site in Spanish
               </p>
             )}
@@ -375,7 +375,7 @@ function Panel({ lead, onClose, onPatch, onCreate, onDelete }: PanelProps) {
                     >
                       <div>
                         <p className="whitespace-pre-wrap text-sm leading-relaxed">{n.text}</p>
-                        <p className="mt-1 text-[0.6875rem] text-dust">{ago(n.at)}</p>
+                        <p className="mt-1 text-micro text-dust">{ago(n.at)}</p>
                       </div>
                       {confirmNote === n.id ? (
                         <span className="flex shrink-0 items-center gap-2 text-xs">

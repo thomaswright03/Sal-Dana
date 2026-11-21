@@ -13,7 +13,7 @@ function LanguageSwitch({ className = "" }: { className?: string }) {
   const locale = useLocale();
   return (
     <div
-      className={`flex items-center gap-1 font-mono text-[0.6875rem] tracking-widest ${className}`}
+      className={`flex items-center gap-1 font-mono text-micro tracking-widest ${className}`}
       role="group"
       aria-label={t.nav.language}
     >
@@ -95,7 +95,7 @@ export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
                 <a
                   key={l.href}
                   href={l.href}
-                  className="group relative text-[0.8125rem] text-sand transition-colors duration-300 hover:text-bone"
+                  className="group relative text-small text-sand transition-colors duration-300 hover:text-bone"
                 >
                   {l.label}
                   <span className="absolute -bottom-1.5 left-0 h-px w-full origin-right scale-x-0 bg-brass transition-transform duration-500 ease-out-expo group-hover:origin-left group-hover:scale-x-100" />
@@ -114,7 +114,7 @@ export function Nav({ hasReviews = false }: { hasReviews?: boolean }) {
               <Magnetic strength={0.3}>
                 <a
                   href="#book"
-                  className="group relative hidden overflow-hidden rounded-full border border-bone/20 px-5 py-2.5 text-[0.8125rem] sm:block"
+                  className="group relative hidden overflow-hidden rounded-full border border-bone/20 px-5 py-2.5 text-small sm:block"
                 >
                   <span className="absolute inset-0 translate-y-[101%] rounded-full bg-brass transition-transform duration-700 ease-out-expo group-hover:translate-y-0" />
                   <span className="relative transition-colors duration-500 group-hover:text-ink">

@@ -19,6 +19,16 @@ describe("status", () => {
     expect(s.overall).toBe("down");
   });
 
+  it("is down overall when the new-lead email cannot be sent (no RESEND_API_KEY)", async () => {
+    delete process.env.RESEND_API_KEY;
+    const s = await getStatus();
+    const mail = by(s, "New-lead email");
+    expect(mail.tier).toBe("important");
+    expect(mail.status).toBe("down");
+    expect(by(s, "Leads waiting for their email").tier).toBe("important");
+    expect(s.overall).toBe("down");
+  });
+
   it("returns exactly the status contract shape", async () => {
     const s = await getStatus();
     expect(Object.keys(s).sort()).toEqual(["checked_at", "functions", "overall", "product"]);

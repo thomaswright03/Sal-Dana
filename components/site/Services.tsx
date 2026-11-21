@@ -110,12 +110,12 @@ export function Services() {
               </div>
               <div className="mt-auto pt-8">
                 <h3 className="font-serif text-[2rem] leading-none tracking-tight sm:text-4xl">{s.title}</h3>
-                <p className="mt-4 text-[0.9375rem] leading-relaxed text-sand">{s.blurb}</p>
+                <p className="mt-4 text-body leading-relaxed text-sand">{s.blurb}</p>
                 <ul className="mt-6 flex flex-wrap gap-2">
                   {s.items.map((item) => (
                     <li
                       key={item}
-                      className="rounded-full border border-line px-3 py-1.5 text-[0.6875rem] tracking-wide text-dust transition-colors duration-500 group-hover:border-bone/15 group-hover:text-sand"
+                      className="rounded-full border border-line px-3 py-1.5 text-micro tracking-wide text-dust transition-colors duration-500 group-hover:border-bone/15 group-hover:text-sand"
                     >
                       {item}
                     </li>

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Magnetic } from "./Magnetic";
 
 const base =
-  "group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-7 py-4 text-[0.8125rem] font-medium tracking-wide transition-colors duration-500";
+  "group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-7 py-4 text-small font-medium tracking-wide transition-colors duration-500";
 
 const variants = {
   solid: "bg-bone text-ink",

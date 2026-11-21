@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useMemo, useState, type DragEvent } from "react";
+import { useEffect, useMemo, useState, type DragEvent } from "react";
 import {
   LEAD_STATUSES,
   SOURCE_LABELS,
@@ -27,10 +27,37 @@ const initials = (name: string) =>
 
 export function LeadsView() {
   const { leads, query, setQuery, openLead, newLead, patchLead, exportCsv, range } = useCrm();
-  const [status, setStatus] = useState<LeadStatus | "all">("all");
+  // This view only mounts after the leads load in the browser, so the address bar is safe to read here.
+  const [status, setStatus] = useState<LeadStatus | "all">(() => {
+    const st = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("status");
+    return st && (LEAD_STATUSES as readonly string[]).includes(st) ? (st as LeadStatus) : "all";
+  });
   const [source, setSource] = useState<LeadSource | "all">("all");
   const [view, setView] = useState<"table" | "board">("table");
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "created", dir: -1 });
+
+  // Keep the filter and search in the address bar so a refresh or Back restores the same view.
+  const [urlRead, setUrlRead] = useState(false);
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setQuery(q);
+    setUrlRead(true);
+    // Read once on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (!urlRead) return;
+    const p = new URLSearchParams(window.location.search);
+    if (status === "all") p.delete("status");
+    else p.set("status", status);
+    if (query.trim()) p.set("q", query);
+    else p.delete("q");
+    const qs = p.toString();
+    const next = `${window.location.pathname}${qs ? `?${qs}` : ""}`;
+    if (next !== `${window.location.pathname}${window.location.search}`) window.history.replaceState(null, "", next);
+  }, [status, query, urlRead]);
 
   const searched = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -183,7 +210,7 @@ export function LeadsView() {
             id="lead-source"
             value={source}
             onChange={(e) => setSource(e.target.value as LeadSource | "all")}
-            className="h-10 rounded-full border border-line bg-ink px-4 text-[0.8125rem] text-sand outline-none focus:border-brass"
+            className="h-10 rounded-full border border-line bg-ink px-4 text-small text-sand outline-none focus:border-brass"
           >
             <option value="all">All sources</option>
             {(Object.keys(SOURCE_LABELS) as LeadSource[]).map((s) => (
@@ -203,7 +230,7 @@ export function LeadsView() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search name or city"
-              className="h-10 w-52 rounded-full border border-line bg-ink pl-9 pr-4 text-[0.8125rem] outline-none placeholder:text-dust focus:border-brass"
+              className="h-10 w-52 rounded-full border border-line bg-ink pl-9 pr-4 text-small outline-none placeholder:text-dust focus:border-brass"
             />
           </label>
           <Segmented
@@ -252,7 +279,7 @@ export function LeadsView() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[940px] text-left text-sm">
               <thead className="bg-ink/60">
-                <tr className="[&>th]:px-4 [&>th]:py-3 [&>th]:font-mono [&>th]:text-[0.625rem] [&>th]:font-normal [&>th]:text-dust">
+                <tr className="[&>th]:px-4 [&>th]:py-3 [&>th]:font-mono [&>th]:text-micro [&>th]:font-normal [&>th]:text-dust">
                   {head("name", "Name")}
                   <th className="uppercase tracking-[0.18em]">Phone</th>
                   {head("city", "City")}
@@ -273,13 +300,13 @@ export function LeadsView() {
                   >
                     <td>
                       <span className="flex items-center gap-3">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-brass/40 text-[0.6875rem] font-medium text-brass">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-brass/40 text-micro font-medium text-brass">
                           {initials(l.name)}
                         </span>
                         <span className="min-w-0">
                           <span className="block truncate font-medium text-bone">{l.name}</span>
                           {l.language === "es" && (
-                            <span className="block text-[0.625rem] text-dust">Prefers Spanish</span>
+                            <span className="block text-micro text-dust">Prefers Spanish</span>
                           )}
                         </span>
                       </span>
@@ -290,7 +317,7 @@ export function LeadsView() {
                     <td className="text-sand">{cityOf(l.address) ?? <span className="text-dust">–</span>}</td>
                     <td className="max-w-[220px]">
                       {l.service ? (
-                        <span className="inline-block max-w-full truncate rounded-full border border-line px-2.5 py-1 text-[0.6875rem] text-sand">
+                        <span className="inline-block max-w-full truncate rounded-full border border-line px-2.5 py-1 text-micro text-sand">
                           {l.service}
                         </span>
                       ) : (
@@ -313,7 +340,7 @@ export function LeadsView() {
                         value={l.status}
                         aria-label={`Status for ${l.name}`}
                         onChange={(e) => void patchLead(l.id, { status: e.target.value })}
-                        className={`cursor-pointer appearance-none rounded-full px-3 py-1 text-[0.6875rem] font-medium outline-none ring-brass/50 focus-visible:ring-2 ${STATUS_TONE[l.status]}`}
+                        className={`cursor-pointer appearance-none rounded-full px-3 py-1 text-micro font-medium outline-none ring-brass/50 focus-visible:ring-2 ${STATUS_TONE[l.status]}`}
                       >
                         {LEAD_STATUSES.map((s) => (
                           <option key={s} value={s} className="bg-coal text-bone">
@@ -381,11 +408,11 @@ function Board({
             <div className="flex items-center justify-between px-2 pb-3 pt-1.5">
               <p className="flex items-center gap-2 text-sm">
                 {STATUS_LABELS[status]}
-                <span className="rounded-full bg-bone/10 px-2 py-0.5 text-[0.6875rem] text-sand">
+                <span className="rounded-full bg-bone/10 px-2 py-0.5 text-micro text-sand">
                   {column.length}
                 </span>
               </p>
-              {total > 0 && <span className="text-[0.6875rem] tabular-nums text-dust">{money(total)}</span>}
+              {total > 0 && <span className="text-micro tabular-nums text-dust">{money(total)}</span>}
             </div>
             <div className="flex flex-1 flex-col gap-2">
               {column.slice(0, 40).map((lead) => (
@@ -407,7 +434,7 @@ function Board({
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-medium leading-tight">{lead.name}</p>
                     {lead.value != null && (
-                      <span className="text-[0.6875rem] font-semibold tabular-nums text-bone">
+                      <span className="text-micro font-semibold tabular-nums text-bone">
                         {money(lead.value)}
                       </span>
                     )}
@@ -418,7 +445,7 @@ function Board({
                   )}
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                     <VisitBadge lead={lead} />
-                    <span className="ml-auto text-[0.625rem] text-dust">
+                    <span className="ml-auto text-micro text-dust">
                       {lead.source === "ai-assistant" ? "AI · " : ""}
                       {ago(lead.createdAt)}
                     </span>
@@ -426,7 +453,7 @@ function Board({
                 </motion.button>
               ))}
               {column.length > 40 && (
-                <p className="px-2 py-1 text-center text-[0.6875rem] text-dust">
+                <p className="px-2 py-1 text-center text-micro text-dust">
                   And {column.length - 40} more. Switch to the table to see them all.
                 </p>
               )}

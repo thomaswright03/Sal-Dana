@@ -78,7 +78,7 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       disabled={disabled}
-      className={`rounded-full border px-4 py-2 text-[0.8125rem] transition-all duration-300 ${
+      className={`rounded-full border px-4 py-2 text-small transition-all duration-300 ${
         disabled
           ? "cursor-not-allowed border-line/60 text-dust/50 line-through"
           : active

@@ -120,7 +120,7 @@ export function ChartCard({
     <Card className={`flex flex-col p-5 sm:p-6 ${className}`} index={index}>
       <header className="mb-5 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-[0.9375rem] font-medium text-bone">{title}</h2>
+          <h2 className="text-body font-medium text-bone">{title}</h2>
           {hint && <p className="mt-1 text-xs leading-relaxed text-dust">{hint}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -190,7 +190,7 @@ function Delta({
   label: string;
   goodWhenUp?: boolean;
 }) {
-  if (value === null) return <p className="text-[0.6875rem] text-dust">No earlier data to compare</p>;
+  if (value === null) return <p className="text-micro text-dust">No earlier data to compare</p>;
   const flat = Math.abs(value) < 0.05;
   const up = value > 0;
   const good = flat ? null : up === goodWhenUp;
@@ -201,7 +201,7 @@ function Delta({
         ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
         : "border-rose-400/25 bg-rose-400/10 text-rose-200";
   return (
-    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.6875rem] text-dust">
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-micro text-dust">
       <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium ${tone}`}>
         <svg
           viewBox="0 0 10 10"
@@ -270,9 +270,9 @@ export function Tile({
           {current !== undefined && previous !== undefined ? (
             <Delta value={change(current, previous)} label={compareLabel ?? ""} goodWhenUp={goodWhenUp} />
           ) : (
-            <p className="text-[0.6875rem] text-dust">{note}</p>
+            <p className="text-micro text-dust">{note}</p>
           )}
-          {current !== undefined && note && <p className="mt-1 text-[0.6875rem] text-dust">{note}</p>}
+          {current !== undefined && note && <p className="mt-1 text-micro text-dust">{note}</p>}
         </div>
         {series && series.some((v) => v > 0) && (
           <Sparkline values={compact(series)} className="hidden h-9 w-24 shrink-0 sm:block" />
@@ -310,7 +310,7 @@ export function Segmented<T extends string | number>({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(o.value)}
-            className="relative shrink-0 rounded-full px-3.5 py-1.5 text-[0.8125rem]"
+            className="relative shrink-0 rounded-full px-3.5 py-1.5 text-small"
           >
             {active && (
               <motion.span
@@ -325,7 +325,7 @@ export function Segmented<T extends string | number>({
               {o.label}
               {o.count !== undefined && (
                 <span
-                  className={`rounded-full px-1.5 text-[0.625rem] tabular-nums ${active ? "bg-ink/15" : "bg-bone/10 text-dust"}`}
+                  className={`rounded-full px-1.5 text-micro tabular-nums ${active ? "bg-ink/15" : "bg-bone/10 text-sand"}`}
                 >
                   {o.count}
                 </span>
@@ -373,7 +373,7 @@ export function PageHead({
 
 export function SampleTag({ children = "Sample data" }: { children?: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-[0.625rem] uppercase tracking-[0.16em] text-brass">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-brass/40 bg-brass/10 px-2.5 py-1 text-micro uppercase tracking-[0.16em] text-brass">
       <Icon name="ask" className="h-3 w-3" />
       {children}
     </span>
@@ -391,7 +391,7 @@ export function Empty({ title, children }: { title: string; children: ReactNode 
 
 export const btn = {
   primary:
-    "inline-flex items-center gap-2 rounded-full bg-brass px-4 py-2 text-[0.8125rem] font-medium text-ink transition-colors hover:bg-brass-bright disabled:opacity-50",
+    "inline-flex items-center gap-2 rounded-full bg-brass px-4 py-2 text-small font-medium text-ink transition-colors hover:bg-brass-bright disabled:opacity-50",
   ghost:
-    "inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-[0.8125rem] text-sand transition-colors hover:border-bone/30 hover:text-bone disabled:opacity-50",
+    "inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-small text-sand transition-colors hover:border-bone/30 hover:text-bone disabled:opacity-50",
 };

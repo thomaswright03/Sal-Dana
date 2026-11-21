@@ -122,7 +122,7 @@ export function ScheduleView() {
         <Card className="p-5 sm:p-6" index={4}>
           <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-[0.9375rem] font-medium">
+              <h2 className="text-body font-medium">
                 Week of {shortDay(week[0])} to {shortDay(week[week.length - 1])}
               </h2>
               <p className="mt-1 text-xs text-dust">
@@ -180,7 +180,7 @@ export function ScheduleView() {
                         : "border-line text-sand hover:border-bone/25"
                   }`}
                 >
-                  <span className="block font-mono text-[0.625rem] uppercase tracking-[0.18em] opacity-80">
+                  <span className="block font-mono text-micro uppercase tracking-[0.18em] opacity-80">
                     {weekday(d)}
                   </span>
                   <span className="block text-lg font-semibold leading-tight">{Number(d.slice(8))}</span>
@@ -191,7 +191,7 @@ export function ScheduleView() {
                 <div key={w.id} className="contents">
                   <div className="flex flex-col justify-center pr-2 text-right">
                     <span className="text-xs text-sand">{w.label}</span>
-                    <span className="text-[0.625rem] text-dust">{w.range}</span>
+                    <span className="text-micro text-dust">{w.range}</span>
                   </div>
                   {week.map((d) => {
                     const visits = (byDay.get(d) ?? []).filter((l) => l.appointment!.window === w.id);
@@ -203,7 +203,7 @@ export function ScheduleView() {
                         className={`min-h-[104px] rounded-xl border p-1.5 ${picked === d ? "border-line bg-bone/[0.03]" : "border-line/60"}`}
                       >
                         {shown.length === 0 && (
-                          <span className="flex h-full items-center justify-center text-[0.6875rem] text-dust/60">
+                          <span className="flex h-full items-center justify-center text-micro text-dust/60">
                             {d < today ? "" : "Open"}
                           </span>
                         )}
@@ -218,10 +218,10 @@ export function ScheduleView() {
                             className={`mb-1 block w-full rounded-lg border p-2 text-left transition-colors last:mb-0 hover:border-brass ${CARD_TONE[l.appointment!.status]}`}
                           >
                             <span className="block truncate text-xs font-medium text-bone">{l.name}</span>
-                            <span className="block truncate text-[0.6875rem] text-sand">
+                            <span className="block truncate text-micro text-sand">
                               {l.service || "Visit"}
                             </span>
-                            <span className="mt-1 flex items-center gap-1 truncate text-[0.625rem] text-dust">
+                            <span className="mt-1 flex items-center gap-1 truncate text-micro text-dust">
                               <Icon name="pin" className="h-2.5 w-2.5 shrink-0" />
                               {cityOf(l.address) ?? "No address"}
                             </span>
@@ -245,7 +245,7 @@ export function ScheduleView() {
 
         <div className="space-y-3">
           <Card className="p-5 sm:p-6" index={5}>
-            <h2 className="text-[0.9375rem] font-medium">{dayLabel(picked, true)}</h2>
+            <h2 className="text-body font-medium">{dayLabel(picked, true)}</h2>
             <p className="mt-1 text-xs text-dust">
               {day.length
                 ? `${day.filter((l) => l.appointment!.status === "completed").length} of ${day.length} visits done`
@@ -281,7 +281,7 @@ export function ScheduleView() {
           </Card>
 
           <Card className="p-5 sm:p-6" index={6}>
-            <h2 className="text-[0.9375rem] font-medium">Waiting on you</h2>
+            <h2 className="text-body font-medium">Waiting on you</h2>
             <p className="mt-1 text-xs text-dust">Requested visits that haven’t been confirmed yet.</p>
             {waiting.length === 0 && <p className="mt-4 text-sm text-dust">All caught up.</p>}
             <ul className="mt-4 space-y-2">
@@ -297,7 +297,7 @@ export function ScheduleView() {
                   <button
                     type="button"
                     onClick={() => setStatus(l, "confirmed")}
-                    className="shrink-0 rounded-full border border-brass/50 px-3 py-1 text-[0.6875rem] text-brass transition-colors hover:bg-brass hover:text-ink"
+                    className="shrink-0 rounded-full border border-brass/50 px-3 py-1 text-micro text-brass transition-colors hover:bg-brass hover:text-ink"
                   >
                     Confirm
                   </button>

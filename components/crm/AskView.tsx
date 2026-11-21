@@ -199,7 +199,7 @@ export function AskView() {
         <Card className="mb-3 overflow-hidden" index={0}>
           <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.2fr_1fr]">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-brass/40 bg-brass/10 px-3 py-1 text-[0.625rem] uppercase tracking-[0.16em] text-brass">
+              <span className="inline-flex items-center gap-2 rounded-full border border-brass/40 bg-brass/10 px-3 py-1 text-micro uppercase tracking-[0.16em] text-brass">
                 <span className="h-1.5 w-1.5 rounded-full bg-brass" /> Not connected yet
               </span>
               <h2 className="mt-4 font-serif text-3xl leading-tight tracking-tight sm:text-4xl">
@@ -217,7 +217,7 @@ export function AskView() {
                 "Add ANTHROPIC_API_KEY with the key as its value, and redeploy.",
               ].map((step, i) => (
                 <li key={step} className="flex gap-3 rounded-xl border border-line bg-ink/60 p-3.5">
-                  <span className="font-mono text-[0.6875rem] text-brass">
+                  <span className="font-mono text-micro text-brass">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="leading-relaxed">{step}</span>
@@ -237,7 +237,7 @@ export function AskView() {
                   <Icon name="ask" className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-[0.9375rem] font-medium text-bone">
+                  <p className="text-body font-medium text-bone">
                     {connected ? `What would you like to know, ${site.owner}?` : "Questions it will answer"}
                   </p>
                   <p className="text-xs text-dust">
@@ -382,7 +382,7 @@ export function AskView() {
               <Icon name="arrow" className="h-4 w-4 -rotate-90" />
             </button>
           </div>
-          <p className="mx-auto mt-2 max-w-3xl px-1 text-[0.6875rem] text-dust">
+          <p className="mx-auto mt-2 max-w-3xl px-1 text-micro text-dust">
             Answers come from the records in this dashboard. Dollar figures are the estimates you entered.
           </p>
         </form>

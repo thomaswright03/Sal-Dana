@@ -12,6 +12,11 @@
   --color-brass-bright: #e8cc96;
   --color-brass-deep: #8f7242;
 
+  /* Named type scale for the small sizes (never below 11px). */
+  --text-micro: 0.6875rem;
+  --text-small: 0.8125rem;
+  --text-body: 0.9375rem;
+
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-serif: var(--font-display), "Iowan Old Style", "Times New Roman", serif;

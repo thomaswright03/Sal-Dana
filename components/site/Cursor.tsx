@@ -72,7 +72,7 @@ export function Cursor() {
         transition={{ type: "spring", stiffness: 300, damping: 24 }}
       >
         {label && (
-          <span className="font-mono text-[0.625rem] uppercase tracking-[0.18em] text-ink">{label}</span>
+          <span className="font-mono text-micro uppercase tracking-[0.18em] text-ink">{label}</span>
         )}
       </motion.div>
       <motion.div

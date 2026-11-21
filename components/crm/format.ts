@@ -42,7 +42,7 @@ export const STATUS_TONE: Record<LeadStatus, string> = {
   quoted: "bg-violet-400/15 text-violet-200",
   scheduled: "bg-amber-400/15 text-amber-200",
   won: "bg-emerald-400/15 text-emerald-200",
-  lost: "bg-bone/10 text-dust",
+  lost: "bg-bone/10 text-sand",
 };
 
 export function toCsv(leads: Lead[]): string {

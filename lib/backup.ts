@@ -1,4 +1,5 @@
 import "server-only";
+import { listReviews, saveReview } from "./reviews";
 import {
   listKeys,
   listKeysFrom,
@@ -46,7 +47,7 @@ export async function runBackup(): Promise<{
 }> {
   const date = todayInPhoenix();
   const leads = await readMany<Lead>(await listKeys("leads/"));
-  const reviews = (await readJson<Review[]>("reviews.json")) ?? [];
+  const reviews = await listReviews();
   const snapshot: Snapshot = { version: 1, takenAt: new Date().toISOString(), leads, reviews };
   await writeJson(backupKey(date), snapshot);
   const token = secondToken();
@@ -105,16 +106,14 @@ export async function restoreBackup(
     }
     leads++;
   }
-  // Reviews are one document: add back any that are missing (or replace with `overwrite`).
+  // Reviews are one document each: add back any that are missing (or replace with `overwrite`).
   let reviews = 0;
-  const current = (await readJson<Review[]>("reviews.json")) ?? [];
-  const byId = new Map(current.map((r) => [r.id, r]));
+  const have = new Set((await listReviews()).map((r) => r.id));
   for (const r of snap.reviews.filter((x) => want(x.id))) {
-    if (!opts.overwrite && byId.has(r.id)) continue;
-    byId.set(r.id, r);
+    if (!opts.overwrite && have.has(r.id)) continue;
+    await saveReview(r);
     reviews++;
   }
-  if (reviews) await writeJson("reviews.json", [...byId.values()]);
   await recordOps("restore", true, `Restored ${leads} leads and ${reviews} reviews from ${date}`);
   return { leads, reviews };
 }

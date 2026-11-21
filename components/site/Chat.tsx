@@ -207,7 +207,7 @@ export function Chat() {
                 </div>
                 <div>
                   <p className="font-serif text-xl leading-none">{t.title}</p>
-                  <p className="mt-1.5 flex items-center gap-2 text-[0.6875rem] text-dust">
+                  <p className="mt-1.5 flex items-center gap-2 text-micro text-dust">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                     {t.subtitle}
                   </p>
@@ -237,7 +237,7 @@ export function Chat() {
               aria-live="polite"
             >
               <div className="flex flex-col items-start">
-                <div className="max-w-[86%] whitespace-pre-wrap rounded-2xl rounded-bl-md bg-char px-4 py-3 text-[0.9375rem] leading-relaxed text-bone">
+                <div className="max-w-[86%] whitespace-pre-wrap rounded-2xl rounded-bl-md bg-char px-4 py-3 text-body leading-relaxed text-bone">
                   {t.greeting}
                 </div>
               </div>
@@ -253,7 +253,7 @@ export function Chat() {
                   >
                     {m.content && (
                       <div
-                        className={`max-w-[86%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-[0.9375rem] leading-relaxed ${
+                        className={`max-w-[86%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-body leading-relaxed ${
                           m.role === "user"
                             ? "rounded-br-md bg-brass text-ink"
                             : m.error
@@ -320,7 +320,7 @@ export function Chat() {
                       key={s}
                       type="button"
                       onClick={() => void send(s)}
-                      className="rounded-full border border-line px-3.5 py-2 text-[0.8125rem] text-sand transition-colors hover:border-brass/60 hover:text-bone"
+                      className="rounded-full border border-line px-3.5 py-2 text-small text-sand transition-colors hover:border-brass/60 hover:text-bone"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, ease: EASE, delay: 0.35 + i * 0.07 }}
@@ -348,7 +348,7 @@ export function Chat() {
                   maxLength={2000}
                   placeholder={t.placeholder}
                   aria-label={t.messageLabel}
-                  className="max-h-28 min-h-[1.75rem] flex-1 resize-none bg-transparent py-1 text-[0.9375rem] text-bone outline-none placeholder:text-dust/70 focus-visible:outline-none [field-sizing:content]"
+                  className="max-h-28 min-h-[1.75rem] flex-1 resize-none bg-transparent py-1 text-body text-bone outline-none placeholder:text-dust/70 focus-visible:outline-none [field-sizing:content]"
                 />
                 <button
                   type="submit"
@@ -367,7 +367,7 @@ export function Chat() {
                   </svg>
                 </button>
               </div>
-              <p className="mt-2 text-center text-[0.625rem] leading-relaxed text-dust">
+              <p className="mt-2 text-center text-micro leading-relaxed text-dust">
                 {t.footnote} {LEGAL_LABELS[locale].chatNotice}{" "}
                 <a href={LEGAL_PATHS[locale].privacy} className="underline hover:text-brass">
                   {LEGAL_LABELS[locale].privacy}

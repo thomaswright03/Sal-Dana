@@ -240,7 +240,7 @@ export function ReviewsView() {
                         {r.name[0]?.toUpperCase()}
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate text-[0.9375rem] font-medium text-bone">{r.name}</p>
+                        <p className="truncate text-body font-medium text-bone">{r.name}</p>
                         <p className="truncate text-xs text-dust">
                           {[r.city, r.service, REVIEW_SOURCE_LABELS[r.source], monthYear(r.date)]
                             .filter(Boolean)
@@ -260,7 +260,7 @@ export function ReviewsView() {
                       role="switch"
                       aria-checked={r.published}
                       onClick={() => void toggle(r)}
-                      className="group flex items-center gap-3 text-[0.8125rem] text-sand"
+                      className="group flex items-center gap-3 text-small text-sand"
                     >
                       <span
                         className={`relative h-6 w-11 rounded-full border transition-colors ${
@@ -347,7 +347,7 @@ export function ReviewsView() {
           </ChartCard>
 
           <Card className="p-5 sm:p-6" index={7}>
-            <h2 className="text-[0.9375rem] font-medium text-bone">Ask for a review</h2>
+            <h2 className="text-body font-medium text-bone">Ask for a review</h2>
             <p className="mt-1 text-xs leading-relaxed text-dust">
               Finished jobs with no review on file. Text opens your messages app with a note ready to send.
             </p>

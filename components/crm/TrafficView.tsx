@@ -260,7 +260,7 @@ export function TrafficView() {
             <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-brass">
               <Icon name="eye" />
             </span>
-            <h2 className="mt-4 text-[0.9375rem] font-medium text-bone">How this is counted</h2>
+            <h2 className="mt-4 text-body font-medium text-bone">How this is counted</h2>
             <p className="mt-2 text-xs leading-relaxed text-dust">
               Each browser session counts as one visitor, the first time it opens the site. Search engine
               crawlers and other bots are left out. Only daily totals are kept, so there is nothing to consent

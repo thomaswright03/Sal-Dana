@@ -21,7 +21,7 @@ const LABEL: Record<AppointmentStatus, string> = {
 export function VisitPill({ status }: { status: AppointmentStatus }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] ${TONE[status]}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-micro ${TONE[status]}`}
     >
       <Icon
         name={status === "completed" ? "check" : status === "cancelled" ? "x" : "clock"}
@@ -43,7 +43,7 @@ export function VisitStatus({
   const a = lead.appointment;
   if (!a) return null;
   const action =
-    "rounded-full border border-line px-3 py-1 text-[0.6875rem] text-sand transition-colors hover:border-brass/60 hover:text-bone";
+    "rounded-full border border-line px-3 py-1 text-micro text-sand transition-colors hover:border-brass/60 hover:text-bone";
   return (
     <span className="flex flex-wrap items-center gap-2">
       <VisitPill status={a.status} />
@@ -72,7 +72,7 @@ export function VisitBadge({ lead }: { lead: Lead }) {
   const a = lead.appointment;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.6875rem] ${a.status === "requested" ? "bg-brass/15 text-brass" : "bg-bone/10 text-sand"}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-micro ${a.status === "requested" ? "bg-brass/15 text-brass" : "bg-bone/10 text-sand"}`}
     >
       <Icon name="schedule" className="h-3 w-3" />
       {dayLabel(a.date)}

@@ -16,7 +16,7 @@ function Pill({ on, children }: { on: boolean | null; children: ReactNode }) {
         : "border-brass/40 bg-brass/10 text-brass";
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] ${tone}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-micro ${tone}`}
     >
       {on !== null && <Icon name={on ? "check" : "clock"} className="h-3 w-3" />}
       {children}
@@ -52,7 +52,7 @@ function Row({
 }
 
 const Code = ({ children }: { children: ReactNode }) => (
-  <code className="rounded bg-bone/[0.07] px-1.5 py-0.5 font-mono text-[0.6875rem] text-sand">
+  <code className="rounded bg-bone/[0.07] px-1.5 py-0.5 font-mono text-micro text-sand">
     {children}
   </code>
 );
@@ -101,7 +101,7 @@ export function SettingsView() {
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         <Card className="p-5 sm:p-6" index={0}>
-          <h2 className="text-[0.9375rem] font-medium text-bone">Business details</h2>
+          <h2 className="text-body font-medium text-bone">Business details</h2>
           <p className="mt-1 text-xs leading-relaxed text-dust">
             These appear across the website and are what the booking assistant tells customers. To change any
             of them, send the new details to whoever looks after the site.
@@ -120,7 +120,7 @@ export function SettingsView() {
         </Card>
 
         <Card className="p-5 sm:p-6" index={1}>
-          <h2 className="text-[0.9375rem] font-medium text-bone">Connections</h2>
+          <h2 className="text-body font-medium text-bone">Connections</h2>
           <p className="mt-1 text-xs leading-relaxed text-dust">The services this dashboard relies on.</p>
           <ul className="mt-5 divide-y divide-line/70">
             <Row
@@ -197,7 +197,7 @@ export function SettingsView() {
         </Card>
 
         <Card className="p-5 sm:p-6" index={2}>
-          <h2 className="text-[0.9375rem] font-medium text-bone">Your data</h2>
+          <h2 className="text-body font-medium text-bone">Your data</h2>
           <ul className="mt-5 divide-y divide-line/70">
             <Row
               icon="download"
@@ -244,7 +244,7 @@ export function SettingsView() {
         </Card>
 
         <Card className="p-5 sm:p-6" index={4}>
-          <h2 className="text-[0.9375rem] font-medium text-bone">Latest update</h2>
+          <h2 className="text-body font-medium text-bone">Latest update</h2>
           <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Round 3: booking, accessibility and safety.</p>
           <h3 className="mt-4 text-xs font-medium text-bone">Frontend changes</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
@@ -267,7 +267,7 @@ export function SettingsView() {
         </Card>
 
         <Card className="p-5 sm:p-6" index={3}>
-          <h2 className="text-[0.9375rem] font-medium text-bone">Access</h2>
+          <h2 className="text-body font-medium text-bone">Access</h2>
           <ul className="mt-5 divide-y divide-line/70">
             <Row icon="settings" title="Dashboard password" aside={null}>
               One password opens this dashboard. To change it, update <Code>CRM_PASSWORD</Code> in the Vercel

@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { requireOwner, storageError } from "@/lib/crm-guard";
-import { deleteReview, listReviews, PERMISSION_ERROR, REVIEWS_TAG, updateReview } from "@/lib/reviews";
+import { deleteReview, getReview, PERMISSION_ERROR, REVIEWS_TAG, updateReview } from "@/lib/reviews";
 import { reviewSchema } from "@/lib/validation";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -18,7 +18,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
     );
   }
   try {
-    const current = (await listReviews()).find((r) => r.id === id);
+    const current = await getReview(id);
     if (current && !current.demo) {
       const next = { ...current, ...parsed.data };
       if (next.published && !next.permission?.trim()) {

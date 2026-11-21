@@ -94,6 +94,15 @@ A daily cron writes `backups/YYYY-MM-DD.json` (all leads and reviews) to the mai
 puts back missing records (existing ones are kept unless `"overwrite":true`; `"from":"second"` reads the second store).
 The round trip (back up, delete a lead, restore it) is covered by `tests/unit/backup.test.ts`.
 
+**Drill on the real stores (2026-11-21).** RPO is 24 h (daily job, 11:00 UTC). At 01:26 UTC `/api/cron/backup` on production
+returned 200 in 2.9 s with 50 leads and 10 reviews. `backups/2026-11-20.json` existed in both `sal-dana-crm` and
+`sal-dana-backups`, and /admin showed "Latest backup" OK. The snapshot was read from the second store and restored into an
+empty scratch store: 50 leads and 10 reviews came back, matching the snapshot, in 70 ms of restore work (measured RTO for the
+data step is under a minute; add a few minutes to sign in and trigger it). `CRON_SECRET` was unreadable (sensitive) so it was rotated.
+
+Reviews are stored one document each (`reviews/<id>.json`), so two saves at once can't overwrite each other.
+Evidence (videos, screenshots, axe, Lighthouse) is in `docs/evidence/`; regenerate it with `npm run evidence`.
+
 ## Tests, CI and evals
 
 `npm test` (unit, Anthropic SDK mocked), `npm run test:e2e` (Playwright: booking form to CRM), `npm run typecheck`,
