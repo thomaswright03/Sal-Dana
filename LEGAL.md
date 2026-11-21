@@ -5,7 +5,7 @@ Checked by the COO on 2026-11-21 from general knowledge; statute text not re-rea
 ## Facts on record
 - Business: Sal Dana Renovations LLC, Arizona. ACC entity number: **unknown** (Alan to provide). The site no longer says "registered".
 - Arizona ROC contractor licence: **unknown** (Alan to confirm). If none, ads must say "not a licensed contractor" and work is limited by the handyman exemption (A.R.S. §32-1121(A)(14), under $1,000, no permit). The site makes no licence or insurance claim; the assistant defers these questions to Alan.
-- Round 2: "on site when he says he will be", "no subcontracted surprises", "does the work himself" removed from site (EN/ES) and assistant prompt; hours now shown as "typically" and confirmed at booking. Still unconfirmed with Alan: service list, area, hours. Spanish copy not native-reviewed.
+- Round 2: "on site when he says he will be", "no subcontracted surprises", "does the work himself" removed from site (EN/ES) and assistant prompt; hours were shown as "typically" (now confirmed 9 AM to 5 PM) and confirmed at booking. Still unconfirmed with Alan: service list, area, hours. Spanish copy not native-reviewed.
 - Vendors: Vercel (hosting, Blob store sal-dana-crm in sfo1, functions iad1); Anthropic API (not switched on; record the account and commercial terms when the key is set; commercial terms exclude training on API data).
 
 ## Laws that apply

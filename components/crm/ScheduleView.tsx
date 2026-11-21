@@ -76,7 +76,7 @@ export function ScheduleView() {
       <PageHead
         title="This week,"
         accent="on time."
-        sub={`Every visit on the calendar. ${site.owner} works ${site.hoursDisplay}, in three windows a day.`}
+        sub={`Every visit on the calendar. Working hours: ${site.hoursDisplay}, in three windows a day.`}
         action={
           <button type="button" onClick={newLead} className={btn.primary}>
             <Icon name="plus" className="h-3.5 w-3.5" /> Add a visit
@@ -118,7 +118,7 @@ export function ScheduleView() {
         />
       </div>
 
-      <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mt-3 grid grid-cols-1 gap-3 2xl:grid-cols-[minmax(0,1fr)_340px]">
         <Card className="p-5 sm:p-6" index={4}>
           <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -162,7 +162,7 @@ export function ScheduleView() {
 
           <div className="overflow-x-auto">
             <div
-              className="grid min-w-[760px] gap-2"
+              className="grid min-w-[640px] gap-2"
               style={{ gridTemplateColumns: `5.5rem repeat(${week.length}, minmax(0, 1fr))` }}
             >
               <span />

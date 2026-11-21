@@ -300,7 +300,7 @@ const es: Copy = {
     tagline: "Reparaciones y renovaciones, terminadas con un estándar más alto.",
   },
   region: REGION_ES,
-  hours: "Normalmente de lunes a sábado, de 8 a. m. a 5 p. m. (se confirma al agendar)",
+  hours: "De lunes a sábado, de 9 a. m. a 5 p. m.",
   registered: "Reparaciones y remodelaciones en Arizona",
   bookCta: "Agenda una visita",
   scroll: "Desliza",

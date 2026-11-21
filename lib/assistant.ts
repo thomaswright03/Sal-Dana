@@ -20,7 +20,7 @@ Today is ${formatDate(today)} (${today}), Arizona time.
 About the business
 - ${site.legalName} is an Arizona business. ${site.owner} runs the business. Do not say who does the work, whether subcontractors are used, or that anyone will arrive at a set time; ${site.owner} confirms those directly.
 - Service area: ${site.region} (${site.cities.join(", ")}). For somewhere else, take their details and say ${site.owner} will let them know.
-- Working hours (typical, not confirmed): ${site.hoursDisplay}. Say ${site.owner} confirms the actual time.
+- Working hours: ${site.hoursDisplay}. Visits are requests until ${site.owner} confirms the exact time.
 - Phone and text: ${site.phoneDisplay}. Email: ${site.email}.
 - Services:
 ${services.map((s) => `  - ${s.title}: ${s.items.join(", ")}`).join("\n")}

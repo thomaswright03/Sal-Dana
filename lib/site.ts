@@ -19,14 +19,14 @@ export const site = {
   region: "Phoenix & the East Valley",
   // Assumed from the 480 area code. Confirm with Alan and edit freely.
   cities: ["Scottsdale", "Paradise Valley", "Tempe", "Mesa", "Chandler", "Gilbert", "Queen Creek", "Phoenix"],
-  // Assumed working hours, used by the booking assistant. Day 0 = Sunday.
+  // Confirmed working hours (9 AM to 5 PM, Thomas 2026-11-21), used by the booking assistant. Day 0 = Sunday.
   workingDays: [1, 2, 3, 4, 5, 6],
-  hoursDisplay: "Typically Monday to Saturday, 8am to 5pm (confirmed when you book)",
+  hoursDisplay: "Monday to Saturday, 9am to 5pm",
   timezone: "America/Phoenix",
 } as const;
 
 export const windows = [
-  { id: "morning", label: "Morning", range: "8 to 11am" },
+  { id: "morning", label: "Morning", range: "9 to 11am" },
   { id: "midday", label: "Midday", range: "11am to 2pm" },
   { id: "afternoon", label: "Afternoon", range: "2 to 5pm" },
 ] as const;

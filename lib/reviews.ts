@@ -43,7 +43,6 @@ export async function createReview(input: NewReview): Promise<Review> {
 
 export async function getReview(id: string): Promise<Review | null> {
   if (!ID_RE.test(id)) return null;
-  await migrateLegacy();
   return readJson<Review>(key(id));
 }
 
@@ -57,7 +56,6 @@ export async function updateReview(id: string, patch: Partial<NewReview>): Promi
 
 export async function deleteReview(id: string): Promise<void> {
   if (!ID_RE.test(id)) return;
-  await migrateLegacy();
   await removeJson(key(id));
 }
 

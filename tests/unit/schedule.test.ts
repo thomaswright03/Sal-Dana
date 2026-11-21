@@ -45,3 +45,14 @@ describe("checkDay", () => {
     expect(r).toEqual({ ok: true, open: [] });
   });
 });
+
+describe("business hours", () => {
+  it("never offers a visit window that starts before 9am", async () => {
+    const { windows, site } = await import("@/lib/site");
+    const { WINDOW_TEXT } = await import("@/lib/i18n");
+    expect(site.hoursDisplay).toBe("Monday to Saturday, 9am to 5pm");
+    expect(windows[0].range.startsWith("9")).toBe(true);
+    expect(WINDOW_TEXT.en.morning.range.startsWith("9")).toBe(true);
+    expect(WINDOW_TEXT.es.morning.range.startsWith("9")).toBe(true);
+  });
+});

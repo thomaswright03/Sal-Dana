@@ -14,12 +14,12 @@ export function localeFromPath(pathname: string | null): Locale {
 
 export const WINDOW_TEXT: Record<Locale, Record<WindowId, { label: string; range: string }>> = {
   en: {
-    morning: { label: "Morning", range: "8 to 11am" },
+    morning: { label: "Morning", range: "9 to 11am" },
     midday: { label: "Midday", range: "11am to 2pm" },
     afternoon: { label: "Afternoon", range: "2 to 5pm" },
   },
   es: {
-    morning: { label: "Mañana", range: "8 a 11 a. m." },
+    morning: { label: "Mañana", range: "9 a 11 a. m." },
     midday: { label: "Mediodía", range: "11 a. m. a 2 p. m." },
     afternoon: { label: "Tarde", range: "2 a 5 p. m." },
   },

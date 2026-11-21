@@ -29,7 +29,7 @@ function LanguageSwitch({ className = "" }: { className?: string }) {
             <a
               href={LOCALE_PATHS[l]}
               hrefLang={l}
-              aria-label={LOCALE_NAMES[l]}
+              aria-label={`${l.toUpperCase()}, ${LOCALE_NAMES[l]}`}
               className="text-dust transition-colors hover:text-bone"
             >
               {l.toUpperCase()}

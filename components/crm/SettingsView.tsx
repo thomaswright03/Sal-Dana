@@ -245,24 +245,20 @@ export function SettingsView() {
 
         <Card className="p-5 sm:p-6" index={4}>
           <h2 className="text-body font-medium text-bone">Latest update</h2>
-          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Round 3: booking, accessibility and safety.</p>
+          <p className="mt-1 text-xs leading-relaxed text-dust">2026-11-21. Round 5: business hours 9 AM to 5 PM, Schedule fit, and cleanups.</p>
           <h3 className="mt-4 text-xs font-medium text-bone">Frontend changes</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
-            <li>Website, Book a visit form: after picking a day, times that are already taken show as “Taken” and can’t be chosen. Closed, past and too-far days say why, in English and Spanish.</li>
-            <li>Website, Book a visit form: if the time is taken just as someone submits, the confirmation says so plainly and that Alan will offer another time.</li>
-            <li>Website, Book a visit form: a wrong phone, name or email is flagged under that field, in English and Spanish.</li>
-            <li>Website: the page no longer glitches on load for visitors who prefer reduced motion.</li>
-            <li>Website: the “Ask &amp; book” button now appears after the top banner scrolls away, so it no longer covers the banner’s bottom row.</li>
-            <li>Leads, lead drawer: deleting a note now asks “Delete for good?” first.</li>
-            <li>Schedule and lead drawer (round 2): a taken visit slot warns and offers “Book it anyway”.</li>
+            <li>Website, English and Spanish, hours and Book a visit form: hours now read “Monday to Saturday, 9am to 5pm” with no “typically”, and the Morning window is 9 to 11am.</li>
+            <li>Schedule: the Morning window starts at 9, the heading line reads correctly, and all six days fit on a laptop screen (the side column sits below the calendar on narrower desktops).</li>
+            <li>Settings, Hours row: shows the confirmed 9 AM to 5 PM. The booking assistant states the same hours.</li>
+            <li>Website, language link (ES / EN): its spoken label now includes the visible letters.</li>
+            <li>Round 4: Leads keeps the status filter and search in the address bar; new favicon; small text moved to a type scale (11px minimum); better contrast on the lost chip and count badges; bigger sample-review label.</li>
           </ul>
           <h3 className="mt-4 text-xs font-medium text-bone">Other changes</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-dust">
-            <li>New public check of open visit times for a day, using the same rules as booking.</li>
-            <li>Restoring a backup now also re-holds the visit slots of restored leads.</li>
-            <li>Two saves of one lead at the same moment: exactly one goes through, the other is asked to reload.</li>
-            <li>Round 2: failed lead emails are queued and retried (count on /admin); backups keep 30 days and are copied to a second store; the status page format was reworked; availability reads slot markers; restore skips expired leads.</li>
-            <li>Round 1: lead emails, assistant on/off switch, daily backups, private /admin status page, branded error pages.</li>
+            <li>Reviews are no longer checked for the old single-file format on every read, only when the list loads.</li>
+            <li>Round 4: reviews are stored one per document; the new-lead email shows as Important on /admin; a production backup and restore drill is recorded in the README; more tests (86).</li>
+            <li>Round 3: live availability in the booking form, reduced-motion fix, atomic stale-edit check, restore re-holds visit slots.</li>
           </ul>
         </Card>
 
